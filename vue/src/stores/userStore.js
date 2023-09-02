@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', {
     actions: {
         async getSpotifyUsername() {
             try {
-                if(this.name) {
+                if(this.name && this.name !== undefined && this.name !== "undefined") {
                     console.log("Already Have Spotify Username")
                     return this.name
                 } 

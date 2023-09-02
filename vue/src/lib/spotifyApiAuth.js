@@ -20,7 +20,11 @@ async function generateCodeChallenge(codeVerifier) {
       .replace(/=+$/, '')
 }
 
-export async function redirectToAuthCodeFlow(clientId, redirectUri, scope) {
+export async function redirectToAuthCodeFlow() {
+    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
+    const redirectUri = 'http://localhost:5173/callback'
+    const scope = 'user-top-read user-modify-playback-state'
+
     const verifier = generateCodeVerifier(128)
     const challenge = await generateCodeChallenge(verifier)
 

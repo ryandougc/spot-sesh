@@ -19,6 +19,9 @@ export const useRoomStore = defineStore('room', {
                 return true
             }
         },
+        checkUserIsHost(userSocketId) {
+            return this.host !== null && userSocketId === this.host.socketId ? true : false
+        },
         leaveRoom() {
             this.id = null,
             this.name = null,

@@ -17,4 +17,19 @@ export function dateAdd(date, interval, units) {
     return ret;
 
     // This function is courtesy of @kip on Stack Overflow: https://stackoverflow.com/a/1214753/11151978
-  }
+}
+
+export function shuffleArray(array) {
+    // This method is an implementation of the Fisher - Yates Shuffle algorithm
+    let len = array.length
+    let temp, i
+
+    while(len) {
+        i = Math.floor(Math.random() * len--)
+        temp = array[len]
+        array[len] = array[i]
+        array[i] = temp
+    }
+
+    return array
+}

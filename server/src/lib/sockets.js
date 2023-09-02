@@ -14,16 +14,17 @@ export default function (io) {
     
                 addUserToRoomInMemory(room, user)
                 socket.to(room).emit('user-joined-room', user)
-    
+
                 cb(true, rooms[room])
             }
         })
     
         socket.on('create-room', (user, cb) => {
-            console.log(user)
-            const room = generateRandomString(6)
+            // const room = generateRandomString(6)
+            const room = user.name
             while(rooms[room]) {
-                room = generateRandomString(6)
+                // room = generateRandomString(6)
+                room = user.name
             }
     
             socket.join(room)
@@ -39,6 +40,26 @@ export default function (io) {
     
             cb(true, rooms[room])
         })
+
+        socket.on('start-session-request', (roomId, cb) => {
+            // Compile all top5 songs
+            const trackList = []
+
+            for(const [socketId, user] of Object.entries(rooms[roomId].members)) {
+                trackList.push(...user.top5)
+            }
+
+            // Send all songs to the hosts front-end
+            cb(true, trackList)
+        })
+
+        socket.on('start-session', (roomId, cb) => {
+            console.log(`Session was started in room ${roomId}`)
+
+            socket.to(roomId).emit('session-started')
+
+            cb()
+        })
     
         socket.on('leave-room', (room, cb) => {
             if(!rooms[room]) cb(false)
@@ -46,12 +67,14 @@ export default function (io) {
             const user = rooms[room].members[socket.id]
     
             socket.leave(room)
+
+            socket.to(room).emit('user-left-room', user)
     
             removeUserFromRoomInMemory(room, socket.id)
     
-            socket.to(room).emit('user-left-room', user)
-    
             reassignHostToRandomMember(room, socket) 
+
+            console.dir(rooms[room], {depth: null})
     
             cb(true)
         })

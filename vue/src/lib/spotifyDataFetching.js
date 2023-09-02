@@ -8,7 +8,23 @@ export async function getSpotifyTop5Tracks(accessToken) {
 
     const top5Tracks = data.items
 
-    console.log(top5Tracks)
+    if(top5Tracks.length === 0) return []
 
-    return top5Tracks
+    const top5TrackUris = top5Tracks.map(track => track.uri)
+
+    return top5TrackUris
+}
+
+export async function playTracks(accessToken, trackList) {
+    try {
+        const body = JSON.stringify({ "uris": trackList })
+
+        return await fetch(`https://api.spotify.com/v1/me/player/play`, {
+            method: "PUT",
+            headers: { "Authorization": `Bearer ${accessToken}` },
+            body: body
+        })
+    } catch(error) {
+        throw new Error(error.message)
+    }
 }

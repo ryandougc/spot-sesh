@@ -1,4 +1,3 @@
-import { reactive } from "vue"
 import { io } from "socket.io-client";
 
 import { useUserStore } from './stores/userStore.js'
@@ -29,4 +28,8 @@ socket.on('change-room-host', host => {
 socket.on('user-left-room', user => {
     useRoomStore().roomEvents.push(`${user.name} has left the room`)
     delete useRoomStore().currentMembers[user.socketId]
+})
+
+socket.on('session-started', _ => {
+    useRoomStore().roomEvents.push('Listening session has started')
 })

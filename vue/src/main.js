@@ -3,11 +3,11 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
-import { router } from './router.js'
-
 import { useAuthStore } from './stores/authStore.js'
 import { useUserStore } from './stores/userStore.js'
 import { useRoomStore } from './stores/roomStore.js'
+
+import { router } from './router.js'
 
 import App from './App.vue'
 

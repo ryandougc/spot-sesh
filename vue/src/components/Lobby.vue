@@ -2,7 +2,7 @@
   <h3>Lobby</h3>
 
   <div id="join-room-container">
-      <p>Name: {{ usersName }}</p>
+      <p>Name: {{ user.name }}</p>
       <label for="recipient">Join A Session</label> <br />
       <input type="text" name="recipient" id="recipient_input" placeholder="Session Id" v-model="sessionToJoin">
       <button id="joinRoom_button" @click="joinRoom">Join</button>
@@ -20,9 +20,6 @@ import { socket } from '@/socket'
 import { getSpotifyTop5Tracks } from '../lib/spotifyDataFetching.js'
 
 export default {
-  props: {
-    usersName: String
-  },
   data() {
     return {
       sessionToJoin: "",
@@ -32,8 +29,9 @@ export default {
   computed: {
     user() {
       return {
-        name: this.usersName,
-        socketId: this.$userStore.socketId
+        name: this.$userStore.name,
+        socketId: this.$userStore.socketId,
+        top5: this.$userStore.top5
       }
     }
   },
@@ -42,7 +40,7 @@ export default {
       socket.emit('join-room', this.sessionToJoin, this.user, (success, room) => {
         if(success) {
             // Move the user into the room they just created
-            this.$router.push(`/room/${room.id}`)
+            this.$router.push(`/room/${room.id}?clk=F`)
 
             this.$roomStore.roomEvents.push("You joined")
             this.$roomStore.id = room.id
@@ -58,7 +56,7 @@ export default {
       socket.emit('create-room', this.user, (success, room) => {
         if(success) {
             // Move the user into the room they just created
-            this.$router.push(`/room/${room.id}`)
+            this.$router.push(`/room/${room.id}?clk=F`)
 
             this.$roomStore.roomEvents.push("You created this room")
             this.$roomStore.id = room.id
