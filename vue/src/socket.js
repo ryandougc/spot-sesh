@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { useUserStore } from './stores/userStore.js'
 import { useRoomStore } from './stores/roomStore.js'
 
-export const socket = io(`http://localhost:${import.meta.env.VITE_SOCKET_PORT}`)
+export const socket = io(import.meta.env.VITE_SOCKET_URL)
 
 socket.on("connect", () => {
   useUserStore().socketId = socket.id

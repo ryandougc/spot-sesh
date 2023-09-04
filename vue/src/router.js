@@ -12,6 +12,7 @@ import { useUserStore } from './stores/userStore.js'
 import { getAccessToken } from './lib/spotifyApiAuth.js'
 
 export const router = createRouter({
+    base: '/',
     history: createWebHistory(),
     routes: [
         {
@@ -30,7 +31,7 @@ export const router = createRouter({
                 // Handle redirecting routes from /callback to homepage is the authentication is successful
 
                 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
-                const redirectUri = 'http://localhost:5173/callback'
+                const redirectUri = `${import.meta.env.VITE_FRONTEND_URL}/callback`
                 const code = to.query.code
 
                 try {
