@@ -16,11 +16,9 @@ For development:
 ### Environment Variables
 `server`
 	- NODE_ENV: just keep this as 'development' unless this is getting hosted
-	- EXPRESS_PORT: This port needs to match `VITE_FRONTEND_PORT` in Vue's `.env` file. This is the port the front-end SPA will be hosted on.
-	- SOCKET_PORT: default value is 3001. This port needs to match `VITE_SOCKET_PORT` in Vue's `.env` file
+	- SOCKET_PORT: default value is 3001. This port needs to match `VITE_SOCKET_PORT` is Vue's `.env` file
 	- FRONT_END_URL: This URL is where your Vue app is hosted. You must include the port if it is on the localhost
 `vue`
-	- NODE_ENV: just keep this as `development` unless this is getting hosted, then switch to `production`
-	- VITE_SOCKET_URL: This port needs to match of where the socket server is running, and `SOCKET_PORT` in the server's `.env` file
-	- VITE_FRONTEND_URL: This port is the URL and port of where your front-end app will be running
+	- NODE_ENV= just keep this as 'development' unless this is getting hosted
+	- VITE_SOCKET_PORT: This port needs to match `SOCKET_PORT` in the server's `.env` file
 	- VITE_SPOTIFY_CLIENT_ID: This needs to be the 'Client Id' in your Spotify app dashboard settings
