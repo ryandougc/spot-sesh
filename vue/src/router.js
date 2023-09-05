@@ -12,8 +12,8 @@ import { useUserStore } from './stores/userStore.js'
 import { getAccessToken } from './lib/spotifyApiAuth.js'
 
 export const router = createRouter({
-    base: '/',
     history: createWebHistory(),
+    base: import.meta.env.VITE_BASE_URL,
     routes: [
         {
             path: "/",
@@ -21,7 +21,9 @@ export const router = createRouter({
             name: Home,
             beforeEnter: async () => {
                 // Get users spotify username
-                await useUserStore().getSpotifyUsername()
+                if(useAuthStore().userExists) {
+                    await useUserStore().getSpotifyUsername()
+                }
             }
         }, {
             // This path is simply used as an intermediary for the spotify API token request return redirect

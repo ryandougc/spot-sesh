@@ -11,6 +11,7 @@ export default defineConfig({
   base: './',
   build: {
     outDir: '../server/public'
+    // outDir: './dist'
   },
   resolve: {
     alias: {

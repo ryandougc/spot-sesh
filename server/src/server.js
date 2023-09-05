@@ -3,14 +3,16 @@ import 'dotenv/config.js'
 // Express server
 import express from 'express'
 
-
 const app = express()
 
 const EXPRESS_PORT = process.env.EXPRESS_PORT || 8080
 app.use(express.static('public'))
 
+app.get("*", (req, res, next) => {
+    res.sendFile('index.html', { root: '/home/ryan/Documents/Web Dev/spotify-sesh/server/public' })
+})
 
-app.get("/callback", (req, res, next) => {
+app.get("/*", (req, res, next) => {
     res.sendFile('index.html', { root: '/home/ryan/Documents/Web Dev/spotify-sesh/server/public' })
 })
 

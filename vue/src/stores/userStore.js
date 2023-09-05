@@ -5,6 +5,7 @@ export const useUserStore = defineStore('user', {
     state: () => ({
         socketId: null,
         name: localStorage.getItem("spotify_username"),
+        id: localStorage.getItem("spotify_id"),
         top5: []
     }),
     actions: {
@@ -26,9 +27,12 @@ export const useUserStore = defineStore('user', {
             
                 const spotifyProfile = await result.json()
                 const spotifyUsername = spotifyProfile.display_name
+                const spotifyId = spotifyProfile.id
 
                 this.name = spotifyUsername
                 localStorage.setItem("spotify_username", spotifyUsername)
+                this.id = spotifyId
+                localStorage.setItem("spotify_id", spotifyId)
             
                 return spotifyUsername
             } catch(error) {

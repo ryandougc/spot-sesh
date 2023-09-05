@@ -30,6 +30,7 @@ export default {
     user() {
       return {
         name: this.$userStore.name,
+        id: this.$userStore.id,
         socketId: this.$userStore.socketId,
         top5: this.$userStore.top5
       }

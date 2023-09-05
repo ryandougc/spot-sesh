@@ -7,6 +7,7 @@ export default function (io) {
 
     io.on('connection', socket =>{
         socket.on('join-room', (room, user, cb) => {
+            console.log(user)
             if(rooms[room] === undefined) {
                 cb(false)
             } else { 
@@ -20,11 +21,12 @@ export default function (io) {
         })
     
         socket.on('create-room', (user, cb) => {
-            // const room = generateRandomString(6)
-            const room = user.name
+            // let room = generateRandomString(6)
+            let room = user.name
+
             while(rooms[room]) {
-                // room = generateRandomString(6)
-                room = user.name
+                room = generateRandomString(6)
+                // room = user.name
             }
     
             socket.join(room)
@@ -65,14 +67,20 @@ export default function (io) {
             if(!rooms[room]) cb(false)
     
             const user = rooms[room].members[socket.id]
+
+            removeUserFromRoomInMemory(room, socket.id)
     
             socket.leave(room)
 
-            socket.to(room).emit('user-left-room', user)
-    
-            removeUserFromRoomInMemory(room, socket.id)
-    
-            reassignHostToRandomMember(room, socket) 
+            if(Object.keys(rooms[room].members).length <= 0) {
+                // If no members are left in the room, delete the room.
+                delete rooms[room]
+            } else {
+                // If there are members left in the room, perform the logic for user leaving
+                socket.to(room).emit('user-left-room', user)
+        
+                reassignHostToRandomMember(room, socket) 
+            }
 
             console.dir(rooms[room], {depth: null})
     
@@ -84,13 +92,19 @@ export default function (io) {
                 if(rooms[room]) {
                     const usersName = rooms[room].members[socket.id].name
     
+                    removeUserFromRoomInMemory(room, socket.id)
+
                     socket.leave(room)
     
-                    removeUserFromRoomInMemory(room, socket.id)
+                    if(Object.keys(rooms[room].members).length <= 0) {
+                        delete rooms[room]
+                    } else {
+                        socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
     
-                    socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
+                        reassignHostToRandomMember(room, socket)
+                    }
     
-                    reassignHostToRandomMember(room, socket)
+
                 }
             })
         })
