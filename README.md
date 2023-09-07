@@ -1,9 +1,5 @@
 
-#  Spot Sesh
-
-![SpotSesh Logo](./spotsesh-logo.png "Logo")
-
-
+# ![SpotSesh Logo](./spotsesh-logo.png "Logo")
   
 
 Like russian roulette but for your top 5 most listened to songs.
