@@ -8,6 +8,14 @@ export const useUserStore = defineStore('user', {
         id: localStorage.getItem("spotify_id"),
         top5: []
     }),
+    getters: {
+        properName: (state) => {
+            const firstLetterUpperCase = state.name.charAt(0).toUpperCase()
+            const upperCaseName = firstLetterUpperCase + state.name.slice(1)
+
+            return upperCaseName
+        }
+    },
     actions: {
         async getSpotifyUsername() {
             try {

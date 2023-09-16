@@ -1,0 +1,71 @@
+@import './base.scss';
+
+// Components
+.button-large {
+    width: 187px;
+    height: 45px;
+
+    padding-bottom: 3px;
+
+    border-radius: 50px;
+
+    color: $c-white;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+#app {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  
+    font-weight: normal;
+}
+
+.spot-sesh-logo {
+    display: flex;
+    width: 180px;
+    height: 49px;
+    padding: 2px;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.spot-sesh-logo-mobile {
+  width: 35px;
+  width: 35px;
+}
+
+.phone-playing-music-icon {
+  width: 165px;
+  height: 165px;
+}
+
+
+// Media Queries
+@media (hover: hover) {
+}
+
+@media (max-width: 480px) {
+
+}
+@media (max-width: 768px) {
+
+}
+@media (max-width: 1024px) {
+
+}
+@media (max-width: 1200px) {
+
+}
+@media (min-width: 480px) {
+
+}
+
+@media (min-width: 1024px) {
+  
+}

@@ -6,7 +6,14 @@ import { useRoomStore } from './stores/roomStore.js'
 export const socket = io(import.meta.env.VITE_SOCKET_URL)
 
 socket.on("connect", () => {
-  useUserStore().socketId = socket.id
+  if (socket.recovered) {
+    console.log("Session Recovered")
+    // any event missed during the disconnection period will be received now
+  } else {
+    console.log("We lost the session")
+    // new or unrecoverable session
+    useUserStore().socketId = socket.id
+  }
 })
 
 socket.on("disconnect", () => {

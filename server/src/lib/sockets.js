@@ -6,8 +6,16 @@ export default function (io) {
     console.log(`Socket server is listening on port ${ process.env.SOCKET_PORT }`)
 
     io.on('connection', socket =>{
+        if (socket.recovered) {
+            console.log("Big Recovery")
+            // recovery was successful: socket.id, socket.rooms and socket.data were restored
+          } else {
+            console.log("We lost em")
+            // new or unrecoverable session
+          }
+
+
         socket.on('join-room', (room, user, cb) => {
-            console.log(user)
             if(rooms[room] === undefined) {
                 cb(false)
             } else { 
@@ -81,8 +89,6 @@ export default function (io) {
         
                 reassignHostToRandomMember(room, socket) 
             }
-
-            console.dir(rooms[room], {depth: null})
     
             cb(true)
         })
