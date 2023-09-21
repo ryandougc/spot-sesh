@@ -1,5 +1,5 @@
 <template>
-    <div class="profile-photo" @click="activateAccountSettingsPopup">
+    <div class="profile-photo profile-picture-container" @click="activateAccountSettingsPopup">
         <img 
             src="https://i.scdn.co/image/ab67757000003b826c355a38fdc0fc058700f688"
             alt="Spotify profile picture and account settings button"
@@ -43,24 +43,12 @@ export default {
 
 <style lang="scss" scoped>
 .profile-photo {
-    width: 50px;
-    height: 50px;
-
-    border-radius: 50px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
     cursor: pointer;
-    overflow: hidden;
-
-    img {
-        height: 50px;
-    }
 }
 
 .account-settings {
+    z-index: 1;
+
     width: 169px;
     height: 166px;
 

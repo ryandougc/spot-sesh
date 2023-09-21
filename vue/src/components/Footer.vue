@@ -13,8 +13,10 @@
 .footer {
     width: 70%;
 
-    position: absolute;
-    bottom: 10px;
+    margin-top: 5vh;
+    margin-bottom: 5px;
+
+    position: relative;
 
     &__links {
         display: flex;
@@ -29,6 +31,15 @@
     }
 }
 
+@media (min-height: 750px) {
+    .footer {
+        margin-top: 0;
+        margin-bottom: 0;
+
+        position: absolute;
+        bottom: 20px;
+    }
+}
 
 @media (max-width: 750px) {
     .footer {
@@ -38,12 +49,13 @@
 
         &__links {
             &__privacy-policy {
-                width: 100%;
-                font-size: 14px;
+
+                display: none;
             }
 
             p {
-                display: none;
+                width: 100%;
+                font-size: 14px;
             }
         }
     }

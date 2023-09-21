@@ -7,8 +7,19 @@ export const useRoomStore = defineStore('room', {
         name: null,
         host: null,
         currentMembers: {},
-        roomEvents: []
+        roomEvents: [],
+        sessionActive: false
     }),
+    getters: {
+        upperCaseHostName: (state) => {
+            if(!state.host) return null
+            
+            const firstLetterUpperCase = state.host.name.charAt(0).toUpperCase()
+            const upperCaseName = firstLetterUpperCase + state.host.name.slice(1)
+
+            return upperCaseName
+        }
+    },
     actions: {
         checkUserInRoom(userSocketId) {
             const user = this.currentMembers[userSocketId]
