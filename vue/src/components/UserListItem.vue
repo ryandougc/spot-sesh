@@ -1,7 +1,7 @@
 <template>
     <div class="user-list-item">
         <div class="user-list-item__profile-picture profile-picture-container">
-            <img :src="profilePictureURI" alt="Spotify profile picture">
+            <ProfilePicture :profilePictureUrl="profilePictureUrl" />
         </div>
 
         <p class="user-list-item__name">{{ usersName }}</p>
@@ -9,10 +9,15 @@
 </template>
 
 <script>
+import ProfilePicture from './ProfilePicture.vue';
+
 export default {
     props: {
         usersName: String,
-        profilePictureURI: String
+        profilePictureUrl: String
+    },
+    components: {
+        ProfilePicture
     }
 }
 </script>

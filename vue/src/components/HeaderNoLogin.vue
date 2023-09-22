@@ -1,10 +1,12 @@
 <template>
     <div class="navbar">
-        <img 
-            class="navbar__logo spot-sesh-logo"
-            src="../assets/SpotSesh-logo.svg" 
-            alt="SpotSesh Logo"
-        >
+        <router-link to="/" tag="img">
+            <img 
+                class="navbar__logo spot-sesh-logo"
+                src="../assets/SpotSesh-logo.svg" 
+                alt="SpotSesh Logo"
+            >
+        </router-link>
 
         <div class="navbar__links">
             <a href="">How it Works</a>

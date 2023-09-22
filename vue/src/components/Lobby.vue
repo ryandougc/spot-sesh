@@ -62,7 +62,8 @@ export default {
         name: this.$userStore.name,
         id: this.$userStore.id,
         socketId: this.$userStore.socketId,
-        top5: this.$userStore.top5
+        top5: this.$userStore.top5,
+        profilePictureUrl: this.$userStore.profilePictureUrl
       }
     }
   },

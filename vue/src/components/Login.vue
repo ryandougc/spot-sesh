@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="description__content__CTA">
-                    <ButtonSpotifyLogin class="description__content__CTA__button spotify-login-btn" />
+                    <SpotifyLoginButton class="description__content__CTA__button spotify-login-btn" />
                     <p class="description__content__CTA__subtext">Music is better with friends</p>
                 </div>
             </div>
@@ -29,13 +29,13 @@
 </template>
 
 <script>
-import ButtonSpotifyLogin from './buttons/ButtonSpotifyLogin.vue'
+import SpotifyLoginButton from './buttons/SpotifyLoginButton.vue'
 import HeaderNoLogin from './HeaderNoLogin.vue'
 import Footer from './Footer.vue'
 
 export default {
     components: {
-        ButtonSpotifyLogin,
+        SpotifyLoginButton,
         HeaderNoLogin,
         Footer
     },

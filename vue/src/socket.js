@@ -38,5 +38,6 @@ socket.on('user-left-room', user => {
 })
 
 socket.on('session-started', _ => {
+    useRoomStore().sessionActive = true
     useRoomStore().roomEvents.push('Listening session has started')
 })

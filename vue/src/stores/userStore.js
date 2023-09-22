@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia'
 
+import { getUserProfile } from '../lib/spotifyDataFetching.js'
+
 // Setup Global State
 export const useUserStore = defineStore('user', {
     state: () => ({
         socketId: null,
         name: localStorage.getItem("spotify_username"),
         id: localStorage.getItem("spotify_id"),
-        top5: []
+        top5: [],
+        profilePictureUrl: localStorage.getItem("spotify_profilePicture")
     }),
     getters: {
         properName: (state) => {
@@ -17,7 +20,7 @@ export const useUserStore = defineStore('user', {
         }
     },
     actions: {
-        async getSpotifyUsername() {
+        async getSpotifyProfile() {
             try {
                 if(this.name && this.name !== undefined && this.name !== "undefined") {
                     console.log("Already Have Spotify Username")
@@ -28,21 +31,11 @@ export const useUserStore = defineStore('user', {
 
                 const access_token = localStorage.getItem("access_token")
 
-                const result = await fetch("https://api.spotify.com/v1/me", {
-                    method: "GET", 
-                    headers: { Authorization: `Bearer ${access_token}` }
-                })
-            
-                const spotifyProfile = await result.json()
-                const spotifyUsername = spotifyProfile.display_name
-                const spotifyId = spotifyProfile.id
+                const profile = await getUserProfile(access_token)
 
-                this.name = spotifyUsername
-                localStorage.setItem("spotify_username", spotifyUsername)
-                this.id = spotifyId
-                localStorage.setItem("spotify_id", spotifyId)
-            
-                return spotifyUsername
+                this.name = profile.display_name
+                this.id = profile.id
+                this.profilePictureUrl = profile.images[0].url
             } catch(error) {
                 console.log(error)
             }

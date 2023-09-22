@@ -1,11 +1,11 @@
 <template>
-            <HeaderLogin class="room__header" />
+    <HeaderLogin class="room__header" />
     <div id="room">
 
         <BackButton class="room__back-button" @click="leaveRoom" />
 
         <div class="room__information">
-            <p class="room__information__page-title">{{ roomHost }}'s Room</p>
+            <p class="room__information__page-title">{{ roomHost.name }}'s Room</p>
             <p 
                 v-if="!userIsHost && !sessionActive"
                 class="room__information__session-status"
@@ -16,7 +16,7 @@
                 v-if="!userIsHost && sessionActive"
                 class="room__information__session-status"
             >
-                Waiting on your host to start playing the music
+                Listening session has already started
             </p>
 
             <div class="room__information__users-section">
@@ -24,8 +24,8 @@
                     <p class="room__information__users-section__host__title section-title">HOST</p>
                     <div class="room__information__users-section__host__user-card">
                         <UserListItem
-                            :usersName="roomHost"
-                            :profilePictureURI="profilePictureURI" 
+                            :usersName="roomHost.name"
+                            :profilePictureUrl="roomHost.profilePictureUrl" 
                         />
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                         <li v-for="member in roomMembers" :key="member" >
                             <UserListItem
                                 :usersName="member.name"
-                                :profilePictureURI="profilePictureURI" 
+                                :profilePictureUrl="member.profilePictureUrl" 
                             />
                         </li>
                     </ul>
@@ -71,6 +71,8 @@
         </div>
 
     </div>
+
+    <NoActiveSession v-if="noActiveSessionModalActive" @modalAccepted="toggleNoActiveSessionModal" />
     
     <Footer class="footer" />
 </template>
@@ -83,21 +85,26 @@ import { shuffleArray } from '../lib/utils.js'
 import HeaderLogin from "../components/HeaderLogin.vue"
 import Footer from "../components/Footer.vue"
 import UserListItem from "../components/UserListItem.vue"
-import BackButton from "../components/BackButton.vue"
+import BackButton from "../components/buttons/BackButton.vue"
+import NoActiveSession from '../components/modals/NoActiveSession.vue'
 
 export default {
     components: {
         HeaderLogin,
         Footer,
         UserListItem,
-        BackButton
+        BackButton,
+        NoActiveSession
     },
     data() {
         return {
             usersName: this.$userStore.name,
             roomId: this.$roomStore.id,
-            roomHost: this.$roomStore.upperCaseHostName,
-            profilePictureURI: 'https://i.scdn.co/image/ab67757000003b826c355a38fdc0fc058700f688'
+            roomHost: {
+                name: this.$roomStore.upperCaseHostName,
+                profilePictureUrl: this.$roomStore.host.profilePictureUrl
+            },
+            noActiveSessionModalActive: false
         }
     },
     computed: {
@@ -137,12 +144,13 @@ export default {
                         if(result.status === 404) {
                             this.$roomStore.roomEvents.push('Error starting session: You need an active device with Spotify ready')
 
-                            alert('You need to have an active device availalble for Spotify. Open Spotify and start playing a song on the device you want the session to play on. Then come back here and press the "Start Session" button.')
+                            // alert('You need to have an active device availalble for Spotify. Open Spotify and start playing a song on the device you want the session to play on. Then come back here and press the "Start Session" button.')
+                            this.toggleNoActiveSessionModal()
                         } else {
                             socket.emit('start-session', this.$roomStore.id, () => {
                                 this.$roomStore.roomEvents.push('You have started a listening session')
 
-                                this.sessionStartAvailable = false
+                                this.$roomStore.sessionActive = true
                             })
                         }
                     }
@@ -151,6 +159,9 @@ export default {
                 }
 
             })
+        },
+        toggleNoActiveSessionModal() {
+            this.noActiveSessionModalActive = !this.noActiveSessionModalActive
         }
     }
 }
@@ -212,6 +223,11 @@ ul {
             &__title {
                 margin-top: 0;
             }
+        }
+
+
+        &__members__list li:not(:first-child){
+            margin-top: 25px;
         }
     }
 }

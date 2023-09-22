@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Room from './views/Room.vue'
 import Home from './views/Home.vue'
 import Login from './components/Login.vue'
+import PrivacyPolicy from './views/PrivacyPolicy.vue'
 import PageNotFound from './views/PageNotFound.vue'
 
 import { useAuthStore } from './stores/authStore.js'
@@ -20,9 +21,9 @@ export const router = createRouter({
             component: Home,
             name: Home,
             beforeEnter: async () => {
-                // Get users spotify username
+                // Get users spotify profile
                 if(useAuthStore().userExists) {
-                    await useUserStore().getSpotifyUsername()
+                    await useUserStore().getSpotifyProfile()
                 }
             }
         }, {
@@ -45,8 +46,8 @@ export const router = createRouter({
                         useAuthStore().refreshToken = localStorage.getItem('refresh_token')
                         useAuthStore().accessTokenExpiry = localStorage.getItem('access_token_expiry')
         
-                        // Get user's name
-                        await useUserStore().getSpotifyUsername()
+                        // Get user's profile
+                        await useUserStore().getSpotifyProfile()
         
                         return { name: Home }
                     }
@@ -54,6 +55,10 @@ export const router = createRouter({
                     console.log(error)
                 }
             }
+        }, {
+            path: "/privacypolicy",
+            component: PrivacyPolicy,
+            name: PrivacyPolicy
         }, {
             path: "/room/:roomId",
             component: Room,

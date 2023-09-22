@@ -1,32 +1,35 @@
 <template>
     <div class="navbar">
-        <img 
-            class="navbar__logo spot-sesh-logo"
-            src="../assets/SpotSesh-logo.svg" 
-            alt="SpotSesh Logo"
-        >
-        <img
-            class="navbar__logo-mobile spot-sesh-logo-mobile"
-            src="../assets/SpotSesh-logo-mobile.svg" 
-            alt="SpotSesh Logo"
-        >
+        <router-link to="/">
+            <img 
+                class="navbar__logo spot-sesh-logo"
+                src="../assets/SpotSesh-logo.svg" 
+                alt="SpotSesh Logo"
+            >
+            <img
+                class="navbar__logo-mobile spot-sesh-logo-mobile"
+                src="../assets/SpotSesh-logo-mobile.svg" 
+                alt="SpotSesh Logo"
+            >
+        </router-link>
+
 
         <div class="navbar__links">
             <a href="">How it Works</a>
             <a @click="authCodeFlow" v-if="!userIsLoggedIn">Login</a>
-            <ProfilePicture v-if="userIsLoggedIn" />
+            <AccountSettingsButton v-if="userIsLoggedIn" />
         </div>
     </div>
 </template>
 
 <script>
-import ProfilePicture from './ProfilePicture.vue'
+import AccountSettingsButton from './buttons/AccountSettingsButton.vue'
 
 import { redirectToAuthCodeFlow } from '../lib/spotifyApiAuth.js'
 
 export default {
     components: {
-        ProfilePicture
+        AccountSettingsButton
     },
     computed: {
         userIsLoggedIn() {

@@ -47,6 +47,16 @@ export const useAuthStore = defineStore('auth', {
         },
         async getToken() {
 
+        },
+        async logout() {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('access_token_expiry')
+            localStorage.removeItem('expires_in')
+            localStorage.removeItem('refresh_token')
+
+            this.accessToken = null
+            this.accessTokenExpiry = null
+            this.refreshToken = null
         }
     }
 })

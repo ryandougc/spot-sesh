@@ -1,96 +1,46 @@
 <template>
-    <div class="profile-photo profile-picture-container" @click="activateAccountSettingsPopup">
-        <img 
-            src="https://i.scdn.co/image/ab67757000003b826c355a38fdc0fc058700f688"
-            alt="Spotify profile picture and account settings button"
-        >
-    </div>
-
-    <div 
-        v-if="settingsIsActive" 
-        v-click-outside="deactivateAccountSettingsPopup"
-        class="account-settings"
-    >
-        <a @click="">Logout</a>
-        <hr class="account-settings__line-break">
-        <a href="/privacypolicy">Privacy Policy</a>
-        <a @click="">Delete Account</a>
+    <div class="profile-picture-container">
+        <div 
+            class="profile-picture-container__img" 
+            :style="`background-image:url('${ profilePictureUrl }')`"
+        ></div>
     </div>
 </template>
 
 <script>
-import vClickOutside from 'click-outside-vue3'
-
 export default {
-    data() {
-        return {
-            settingsIsActive: false
-        }
-    },
-    methods: {
-        activateAccountSettingsPopup() {
-            this.settingsIsActive = true
-        },
-        deactivateAccountSettingsPopup() {
-            this.settingsIsActive = false
-        }
-    },
-    directives: {
-        clickOutside: vClickOutside.directive
+    props: {
+        profilePictureUrl: String
     }
 }
 </script>
 
 <style lang="scss" scoped>
-.profile-photo {
-    cursor: pointer;
-}
+.profile-picture-container {
+  width: 50px;
+  height: 50px;
 
-.account-settings {
-    z-index: 1;
+  border-radius: 50px;
 
-    width: 169px;
-    height: 166px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    padding: 15px;
+  overflow: hidden;
 
-    position: absolute;
+  &__img {
+    width:100%;
+    height: 50px;
+    position:relative;
+    background:url() 50% 50% no-repeat;
+    background-size:cover;
+    background-clip:content-box;
+  }
 
-    top: 135%;
-    right: 0;
-
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-
-    background-color: $c-secondary-gray;
-
-    border-radius: 5px;
-
-    a, p {
-        color: white;
-        font-size: 16px;
-        font-style: normal;
-        font-weight: 500;
-        line-height: normal;
-
-        text-align: left;
-
-        transition: 150ms;
-
-        cursor: pointer;
-
-        &:hover {
-            color: $c-spotify-green;
-
-            transition: 150ms;
-        }
-    }
-
-    &__line-break {
-        width: 100%;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
+  &__img:before {
+    display:block;
+    content:"";
+    padding-top:75%;
+  }
 }
 </style>
