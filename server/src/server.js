@@ -1,4 +1,5 @@
 import 'dotenv/config.js'
+import { URL } from 'url'
 
 // Express server
 import express from 'express'
@@ -9,11 +10,11 @@ const EXPRESS_PORT = process.env.EXPRESS_PORT || 8080
 app.use(express.static('public'))
 
 app.get("*", (req, res, next) => {
-    res.sendFile('index.html', { root: '/home/ryan/Documents/Web Dev/spotify-sesh/server/public' })
+    res.sendFile('index.html', { root: new URL('../public', import.meta.url).pathname })
 })
 
 app.get("/*", (req, res, next) => {
-    res.sendFile('index.html', { root: '/home/ryan/Documents/Web Dev/spotify-sesh/server/public' })
+    res.sendFile('index.html', { root: new URL('../public', import.meta.url).pathname })
 })
 
 app.listen(EXPRESS_PORT, (err) => {
