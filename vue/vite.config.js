@@ -10,8 +10,8 @@ export default defineConfig({
   ],
   base: process.env.VITE_BASE_URL, //This needs to be changed to the subdirectory value
   build: {
-    outDir: '../server/public'
-    // outDir: './dist'
+    // outDir: '../server/public'
+    outDir: './dist'
   },
   resolve: {
     alias: {
