@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  base: './',
+  base: process.env.VITE_BASE_URL, //This needs to be changed to the subdirectory value
   build: {
     outDir: '../server/public'
     // outDir: './dist'

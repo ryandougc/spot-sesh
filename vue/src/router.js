@@ -13,8 +13,7 @@ import { useUserStore } from './stores/userStore.js'
 import { getAccessToken } from './lib/spotifyApiAuth.js'
 
 export const router = createRouter({
-    history: createWebHistory(),
-    base: import.meta.env.VITE_BASE_URL,
+    history: createWebHistory(import.meta.env.VITE_BASE_URL),
     routes: [
         {
             path: "/",
