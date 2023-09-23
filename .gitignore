@@ -3,3 +3,5 @@
 */.env
 */.env.*
 */dist
+server/public/index.html
+server/public/assets/*
