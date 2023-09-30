@@ -2,117 +2,189 @@ import { generateRandomString } from './utils.js'
 
 let rooms = {} // Move this to cache
 
+import { logger } from './logger.js'
+
 export default function (io) {
     console.log(`Socket server is listening on port ${ process.env.SOCKET_PORT }`)
 
     io.on('connection', socket =>{
-        if (socket.recovered) {
-            console.log("Big Recovery")
-            // recovery was successful: socket.id, socket.rooms and socket.data were restored
-          } else {
-            console.log("We lost em")
-            // new or unrecoverable session
-          }
+        // Each event should have a "cb" function to handle both success and errors
+        // cb(success, data, message?) {
 
+        // }
+
+        // if (socket.recovered) {
+        //     console.log("Big Recovery")
+        //     // recovery was successful: socket.id, socket.rooms and socket.data were restored
+        // } else {
+        //     console.log("We lost em")
+        //     // new or unrecoverable session
+        // }
 
         socket.on('join-room', (room, user, cb) => {
-            if(rooms[room] === undefined) {
-                cb(false)
-            } else { 
-                socket.join(room)
+            try {
+                if(rooms[room] === undefined) {
+                    cb(false)
+                } else {
+                    socket.join(room)
+        
+                    addUserToRoomInMemory(room, user)
+                    socket.to(room).emit('user-joined-room', user)
     
-                addUserToRoomInMemory(room, user)
-                socket.to(room).emit('user-joined-room', user)
+                    cb(true, rooms[room])
+                }
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
 
-                cb(true, rooms[room])
+
+                cb(false, null, error.message)
             }
         })
     
         socket.on('create-room', (user, cb) => {
-            // let room = generateRandomString(6)
-            let room = user.name
+            try {
+                // let room = generateRandomString(6)
+                let room = user.name
 
-            while(rooms[room]) {
-                room = generateRandomString(6)
-                // room = user.name
-            }
-    
-            socket.join(room)
-    
-            // Add room and user to memory
-            rooms[room] = {
-                id: room,
-                host: user.socketId,
-                members: {}
+                while(rooms[room]) {
+                    room = generateRandomString(6)
+                    // room = user.name
+                }
+
+                socket.join(room)
+        
+                // Add room and user to memory
+                rooms[room] = { 
+                    id: room,
+                    host: user.socketId,
+                    members: {}
+                }
+
+                addUserToRoomInMemory(room, user)
+        
+                cb(true, rooms[room])
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
+
+                cb(false, null, error.message)
             }
 
-            addUserToRoomInMemory(room, user)
-    
-            cb(true, rooms[room])
         })
 
         socket.on('start-session-request', (roomId, cb) => {
-            // Compile all top5 songs
             const trackList = []
+            
+            try {
+                // Compile all members' top5 songs
+                for(const [socketId, user] of Object.entries(rooms[roomId].members)) {
+                    trackList.push(...user.top5)
+                }
+    
+                cb(true, trackList)
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
 
-            for(const [socketId, user] of Object.entries(rooms[roomId].members)) {
-                trackList.push(...user.top5)
+
+                cb(false, null, error.message)
             }
-
-            // Send all songs to the hosts front-end
-            cb(true, trackList)
         })
 
         socket.on('start-session', (roomId, cb) => {
-            console.log(`Session was started in room ${roomId}`)
+            try {
+                socket.to(roomId).emit('session-started')
+    
+                cb(true, null)
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
 
-            socket.to(roomId).emit('session-started')
 
-            cb()
+                cb(false, null, error.message)
+            }
+
         })
     
         socket.on('leave-room', (room, cb) => {
-            if(!rooms[room]) cb(false)
+            try {
+                if(!rooms[room]) cb(false, null, "The room you are trying to leave does not exist")
     
-            const user = rooms[room].members[socket.id]
-
-            removeUserFromRoomInMemory(room, socket.id)
+                const user = rooms[room].members[socket.id]
     
-            socket.leave(room)
-
-            if(Object.keys(rooms[room].members).length <= 0) {
-                // If no members are left in the room, delete the room.
-                delete rooms[room]
-            } else {
-                // If there are members left in the room, perform the logic for user leaving
-                socket.to(room).emit('user-left-room', user)
+                removeUserFromRoomInMemory(room, socket.id)
         
-                reassignHostToRandomMember(room, socket) 
-            }
+                socket.leave(room)
     
-            cb(true)
+                if(Object.keys(rooms[room].members).length <= 0) {
+                    // If no members are left in the room, delete the room.
+                    delete rooms[room]
+                } else {
+                    // If there are members left in the room, perform the logic for user leaving
+                    socket.to(room).emit('user-left-room', user)
+            
+                    reassignHostToRandomMember(room, socket) 
+                }
+        
+                cb(true)
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
+
+
+                cb(false, null, error.message)
+            }
         })
     
         socket.on('disconnecting', () => {
-            socket.rooms.forEach(room => {
-                if(rooms[room]) {
-                    const usersName = rooms[room].members[socket.id].name
-    
-                    removeUserFromRoomInMemory(room, socket.id)
+            try {
+                socket.rooms.forEach(room => {
+                    if(rooms[room]) {
+                        const usersName = rooms[room].members[socket.id].name
+        
+                        removeUserFromRoomInMemory(room, socket.id)
 
-                    socket.leave(room)
-    
-                    if(Object.keys(rooms[room].members).length <= 0) {
-                        delete rooms[room]
-                    } else {
-                        socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
-    
-                        reassignHostToRandomMember(room, socket)
+                        socket.leave(room)
+        
+                        if(Object.keys(rooms[room].members).length <= 0) {
+                            delete rooms[room]
+                        } else {
+                            socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
+        
+                            reassignHostToRandomMember(room, socket)
+                        }
                     }
-    
+                })
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
 
-                }
-            })
+            }
         })
     })
 }
