@@ -2,8 +2,19 @@ import { io } from "socket.io-client";
 
 import { useUserStore } from './stores/userStore.js'
 import { useRoomStore } from './stores/roomStore.js'
+import ErrorService from "./services/ErrorService.js";
 
-export const socket = io(import.meta.env.VITE_SOCKET_URL)
+export const socket = io(import.meta.env.VITE_SOCKET_URL, {
+  reconnectionAttempts: 5
+})
+
+socket.io.on("error", error => {
+  error.message = 'Cannot connect to the socket.io instance'
+
+  ErrorService.onError(error)
+
+  // throw error
+})
 
 // socket.on("connect", () => {
 //   if (socket.recovered) {

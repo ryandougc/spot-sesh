@@ -10,6 +10,7 @@ import { useRoomStore } from './stores/roomStore.js'
 import { router } from './router.js'
 
 import App from './App.vue'
+import ErrorService from './services/ErrorService'
 
 const pinia = createPinia()
 const app = createApp(App)
@@ -25,6 +26,9 @@ app.use({
     }
 })
 
+
 app.use(router)
+
+app.config.errorHandler = (error, instance, info) => ErrorService.onError(error)
 
 app.mount('#app')

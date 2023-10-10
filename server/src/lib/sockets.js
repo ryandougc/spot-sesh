@@ -2,7 +2,7 @@ import { generateRandomString } from './utils.js'
 
 let rooms = {} // Move this to cache
 
-import { logger } from './logger.js'
+import { serverLogger as logger } from './logger.js'
 
 export default function (io) {
     console.log(`Socket server is listening on port ${ process.env.SOCKET_PORT }`)
