@@ -1,13 +1,30 @@
 import 'dotenv/config.js'
 
-// // Express server
-// import express from 'express'
-// import { URL } from 'url'
+// Express server
+import express from 'express'
+import bodyParser from 'body-parser'
+import { URL } from 'url'
 
-// const app = express()
+import { frontendLogger as logger } from './lib/logger.js'
 
-// const EXPRESS_PORT = process.env.EXPRESS_PORT || 8080
-// app.use(express.static('public'))
+const app = express()
+
+const EXPRESS_PORT = process.env.EXPRESS_PORT || 8080
+app.use(express.static('public'))
+app.use(bodyParser.json({ type: 'application/json' }))
+
+app.post('/logs', (req, res, next) => {
+    const error = req.body.error
+
+    console.log(error)
+
+    logger.log({ 
+        level: 'error',
+        type: error.name,
+        message: error.message,
+        stack: error.stack
+    })
+})
 
 // app.get("*", (req, res, next) => {
 //     res.sendFile('index.html', { root: new URL('../public', import.meta.url).pathname })
@@ -17,11 +34,11 @@ import 'dotenv/config.js'
 //     res.sendFile('index.html', { root: new URL('../public', import.meta.url).pathname })
 // })
 
-// app.listen(EXPRESS_PORT, (err) => {
-//     if(err) return console.log(err)
+app.listen(EXPRESS_PORT, (err) => {
+    if(err) return console.log(err)
 
-//     return console.log(`Server is listening on port ${EXPRESS_PORT}`)
-// })
+    return console.log(`Server is listening on port ${EXPRESS_PORT}`)
+})
 
 // Socket.io Server
 import { Server } from 'socket.io'
