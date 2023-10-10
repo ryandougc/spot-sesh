@@ -67,6 +67,12 @@ export async function getAccessToken(clientId, code, redirectUri) {
     localStorage.setItem("refresh_token", refresh_token)
     localStorage.setItem("expires_in", expires_in)
     localStorage.setItem("access_token_expiry", expiryTimestamp)
+
+    return {
+        accessToken: access_token,
+        refreshToken: refresh_token,
+        accessTokenExpiry: expiryTimestamp
+    }
 }
 
 export async function refreshAccessToken(clientId, refreshToken) {

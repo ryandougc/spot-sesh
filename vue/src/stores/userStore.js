@@ -35,7 +35,12 @@ export const useUserStore = defineStore('user', {
 
                 this.name = profile.display_name
                 this.id = profile.id
-                this.profilePictureUrl = profile.images[0].url
+
+                if(profile.images.length === 0) {
+                    this.profilePictureUrl = "https://blendicons.s3.eu-central-1.amazonaws.com/files/C8i5xC1kkJ60hK6YC5sp.svg"
+                } else {
+                    this.profilePictureUrl = profile.images[0].url
+                }
             } catch(error) {
                 console.log(error)
             }

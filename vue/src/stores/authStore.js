@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-import { refreshAccessToken } from '../lib/spotifyApiAuth.js'
+import { getAccessToken, refreshAccessToken } from '../lib/spotifyApiAuth.js'
 
 // Setup Global State
 export const useAuthStore = defineStore('auth', {
@@ -45,8 +45,13 @@ export const useAuthStore = defineStore('auth', {
             this.accessTokenExpiry = new Date(localStorage.getItem('access_token_expiry')).getTime()
             this.refreshToken = localStorage.getItem('refresh_token')
         },
-        async getToken() {
-
+        async getAccessToken(clientId, code, redirectUri) {
+            const response = await getAccessToken(clientId, code, redirectUri)
+        
+            // set tokens in authStore
+            this.accessToken = response.accessToken
+            this.refreshToken = response.refreshToken
+            this.accessTokenExpiry = response.accessTokenExpiry
         },
         async logout() {
             localStorage.removeItem('access_token')
