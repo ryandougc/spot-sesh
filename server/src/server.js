@@ -2,6 +2,7 @@ import 'dotenv/config.js'
 
 // Express server
 import express from 'express'
+import cors from 'cors'
 import bodyParser from 'body-parser'
 import { URL } from 'url'
 
@@ -10,17 +11,20 @@ import { frontendLogger as logger } from './lib/logger.js'
 const app = express()
 
 const EXPRESS_PORT = process.env.EXPRESS_PORT || 8080
+
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3001'],
+    
+}))
 app.use(express.static('public'))
 app.use(bodyParser.json({ type: 'application/json' }))
 
 app.post('/logs', (req, res, next) => {
     const error = req.body.error
 
-    console.log(error)
-
     logger.log({ 
         level: 'error',
-        type: error.name,
+        type: error.type,
         message: error.message,
         stack: error.stack
     })
