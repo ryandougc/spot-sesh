@@ -63,9 +63,9 @@ export default {
     align-items: center;
     gap: 10vh;
 
-    &__img {
-
-    }
+    // &__img {
+        
+    // }
 
     &__content {
         display: flex;
