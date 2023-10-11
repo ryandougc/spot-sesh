@@ -8,7 +8,7 @@ const timeout = {
   socketTimeout: null
 }
 
-export const socket = io(import.meta.env.VITE_SOCKET_URLa, {
+export const socket = io(import.meta.env.VITE_SOCKET_URL, {
   reconnectionAttempts: 5
 })
 

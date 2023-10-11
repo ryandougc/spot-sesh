@@ -21,28 +21,24 @@ export const useUserStore = defineStore('user', {
     },
     actions: {
         async getSpotifyProfile() {
-            try {
-                if(this.name && this.name !== undefined && this.name !== "undefined") {
-                    console.log("Already Have Spotify Username")
-                    return this.name
-                } 
+            if(this.name && this.name !== undefined && this.name !== "undefined") {
+                console.log("Already Have Spotify Username")
+                return this.name
+            } 
 
-                console.log("Fetching Spotify Username")
+            console.log("Fetching Spotify Username")
 
-                const access_token = localStorage.getItem("access_token")
+            const access_token = localStorage.getItem("access_token")
 
-                const profile = await getUserProfile(access_token)
+            const profile = await getUserProfile(access_token)
 
-                this.name = profile.display_name
-                this.id = profile.id
+            this.name = profile.display_name
+            this.id = profile.id
 
-                if(profile.images.length === 0) {
-                    this.profilePictureUrl = "https://blendicons.s3.eu-central-1.amazonaws.com/files/C8i5xC1kkJ60hK6YC5sp.svg"
-                } else {
-                    this.profilePictureUrl = profile.images[0].url
-                }
-            } catch(error) {
-                console.log(error)
+            if(profile.images.length === 0) {
+                this.profilePictureUrl = "https://blendicons.s3.eu-central-1.amazonaws.com/files/C8i5xC1kkJ60hK6YC5sp.svg"
+            } else {
+                this.profilePictureUrl = profile.images[0].url
             }
         }
     }

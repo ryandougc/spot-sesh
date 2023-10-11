@@ -12,6 +12,9 @@ import { useUserStore } from './stores/userStore.js'
 
 import ErrorService from './services/ErrorService.js'
 
+import verifyUserAccessToken from './middleware/verifyUserAccessToken'
+import redirectOnInvalidPath from './middleware/redirectOnInvalidPath'
+
 export const router = createRouter({
     history: createWebHistory(import.meta.env.VITE_BASE_URL),
     routes: [
@@ -20,9 +23,13 @@ export const router = createRouter({
             component: Home,
             name: Home,
             beforeEnter: async () => {
-                // Get users spotify profile
-                if(useAuthStore().userExists) {
-                    await useUserStore().getSpotifyProfile()
+                try {
+                    // Get users spotify profile
+                    if(useAuthStore().userExists) {
+                        await useUserStore().getSpotifyProfile()
+                    }
+                } catch(error) {
+                    ErrorService.onError(error)
                 }
             }
         }, {
@@ -30,7 +37,7 @@ export const router = createRouter({
             path: "/callback",
             component: Login,
             beforeEnter: async (to) => {
-                // Handle redirecting routes from /callback to homepage is the authentication is successful
+                // Handle redirecting routes from /callback to homepage if the authentication is successful
 
                 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
                 const redirectUri = `${import.meta.env.VITE_FRONTEND_URL}/callback`
@@ -45,7 +52,7 @@ export const router = createRouter({
                         return { name: Home }
                     }
                 } catch(error) {
-                    console.log(error)
+                    ErrorService.onError(error)
                 }
             }
         }, {
@@ -72,42 +79,7 @@ export const router = createRouter({
 })
 
 router.beforeEach(async () => {
-    // Check if user has a token or not. If the user needs to be refreshed, refresh the token now
-    try {
-        // Check if the user already exists
-        const { tokenExists, tokenIsValid } = await useAuthStore().tokenIsValid
+    await verifyUserAccessToken()
 
-        if(!tokenExists && !tokenIsValid) {
-            // User needs to log in
-            console.log("User is logged out")
-        } else {
-            if(tokenExists && !tokenIsValid) {
-                // Users token needs to be refreshed
-                console.log("token needs to be refreshed")
-                await await useAuthStore().refreshToken()
-            } else {
-                // Users token is valid
-                console.log("User is valid")
-            }
-        }
-    } catch(error) {
-        console.log(error)
-
-        ErrorService.onError(error)
-    }
-})
-
-router.beforeEach((to) => {
-    try {
-        // check for the path "/user/*" and redirect back to the homepage if this path is found
-        const regex = /\/room\/[A-Za-z0-9]+/i
-
-        if(to.path.match(regex) && (to.query.clk !== "F" || to.query.clk === undefined)) {
-            return { name: Home }
-        }
-    } catch(error) {
-        console.log(error)
-
-        ErrorService.onError(error)
-    }
+    await redirectOnInvalidPath()
 })
