@@ -10,7 +10,7 @@ import PageNotFound from './views/PageNotFound.vue'
 import { useAuthStore } from './stores/authStore.js'
 import { useUserStore } from './stores/userStore.js'
 
-import { getAccessToken } from './lib/spotifyApiAuth.js'
+import ErrorService from './services/ErrorService.js'
 
 export const router = createRouter({
     history: createWebHistory(import.meta.env.VITE_BASE_URL),
@@ -38,14 +38,8 @@ export const router = createRouter({
 
                 try {
                     if(code !== null || code !== undefined) {
-                        await getAccessToken(clientId, code, redirectUri)
-        
-                        // set tokens in authStore
-                        useAuthStore().accessToken = localStorage.getItem('access_token')
-                        useAuthStore().refreshToken = localStorage.getItem('refresh_token')
-                        useAuthStore().accessTokenExpiry = localStorage.getItem('access_token_expiry')
-        
-                        // Get user's profile
+                        await useAuthStore().getAccessToken(clientId, code, redirectUri)
+
                         await useUserStore().getSpotifyProfile()
         
                         return { name: Home }
@@ -98,14 +92,22 @@ router.beforeEach(async () => {
         }
     } catch(error) {
         console.log(error)
+
+        ErrorService.onError(error)
     }
 })
 
 router.beforeEach((to) => {
-    // check for the path "/user/*" and redirect back to the homepage if this path is found
-    const regex = /\/room\/[A-Za-z0-9]+/i
+    try {
+        // check for the path "/user/*" and redirect back to the homepage if this path is found
+        const regex = /\/room\/[A-Za-z0-9]+/i
 
-    if(to.path.match(regex) && (to.query.clk !== "F" || to.query.clk === undefined)) {
-        return { name: Home }
+        if(to.path.match(regex) && (to.query.clk !== "F" || to.query.clk === undefined)) {
+            return { name: Home }
+        }
+    } catch(error) {
+        console.log(error)
+
+        ErrorService.onError(error)
     }
 })
