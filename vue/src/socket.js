@@ -4,16 +4,26 @@ import { useUserStore } from './stores/userStore.js'
 import { useRoomStore } from './stores/roomStore.js'
 import ErrorService from "./services/ErrorService.js";
 
-export const socket = io(import.meta.env.VITE_SOCKET_URL, {
+const timeout = {
+  socketTimeout: null
+}
+
+export const socket = io(import.meta.env.VITE_SOCKET_URLa, {
   reconnectionAttempts: 5
 })
 
 socket.io.on("error", error => {
-  error.message = 'Cannot connect to the socket.io instance'
+  // Log an error every time connection to the socket.io instance fails
+  // Only send an error report to the server if all 5 retries fail.
+  error.message = "Cannot connect to the socket.io server."
 
-  ErrorService.onError(error)
+  console.log(`${error.message} Retrying 5 times total.`)
 
-  // throw error
+  clearTimeout(timeout.socketTimeout)
+
+  timeout.socketTimeout = setTimeout(() => {
+    ErrorService.onError(error)
+  }, "6000")
 })
 
 // socket.on("connect", () => {

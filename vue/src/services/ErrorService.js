@@ -6,8 +6,6 @@ export default class ErrorService {
     }
 
     static onError(error) {
-        console.log("Heyo" + error)
-
         // const response = error.response
         // // console.log("Heyo")
         // // console.log(error)
@@ -21,10 +19,13 @@ export default class ErrorService {
             method: 'POST',
             url: 'http://localhost:3000/logs',
             data: {
-                error: error
+                error: {
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                }
             }
         })
-
     }
 
     static onWarn(error) {
