@@ -14,18 +14,15 @@ export default class ErrorService {
         //     // Handle HTTP errors which involve a bad request
 
         // }
+        // axios.post('http://localhost:3000/logs', {
+        //     error: {
+        //         type: error.name,
+        //         message: error.message,
+        //         stack: error.stack
+        //     }
+        // })
 
-        axios({
-            method: 'POST',
-            url: 'http://localhost:3000/logs',
-            data: {
-                error: {
-                    type: error.name,
-                    message: error.message,
-                    stack: error.stack
-                }
-            }
-        })
+        throw new Error(error)
     }
 
     static onWarn(error) {

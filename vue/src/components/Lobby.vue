@@ -30,7 +30,7 @@
                 v-model="sessionToJoin"
             >
             <button class="lobby-content__join-session__join-session-button button-large" @click="joinRoom">Join Session</button>
-            <p v-show="failedToJoinRoom" class="lobby-content__join-session__error-message">That room doesn't exist, please try again</p>
+            <p v-show="failedToJoinRoom.status" class="lobby-content__join-session__error-message">{{ failedToJoinRoom.message }}</p>
         </div>
     </div>
 
@@ -40,7 +40,6 @@
 
 <script>
 import { socket } from '@/socket'
-import { getSpotifyTop5Tracks } from '../lib/spotifyDataFetching.js'
 
 import HeaderLogin from './HeaderLogin.vue'
 import Footer from './Footer.vue'
@@ -53,54 +52,54 @@ export default {
   data() {
     return {
       sessionToJoin: "",
-      failedToJoinRoom: false
+      failedToJoinRoom: {
+        status: false,
+        message: ""
+      }
     }
   },
   computed: {
     user() {
-      return {
-        name: this.$userStore.name,
-        id: this.$userStore.id,
-        socketId: this.$userStore.socketId,
-        top5: this.$userStore.top5,
-        profilePictureUrl: this.$userStore.profilePictureUrl
-      }
+      return this.$userStore.userObject
     }
   },
   methods: {
     joinRoom() {
-      socket.emit('join-room', this.sessionToJoin, this.user, (success, room) => {
+      socket.emit('join-room', this.sessionToJoin, this.user, (success, room, message) => {
         if(success) {
             // Move the user into the room they just created
             this.$router.push(`/room/${room.id}?clk=F`)
 
+            console.log(room)
+
             this.$roomStore.roomEvents.push("You joined")
             this.$roomStore.id = room.id
             this.$roomStore.currentMembers = room.members
-            this.$roomStore.host = room.members[room.host]
+            this.$roomStore.host = room.host
         } else {
             this.sessionToJoin = ""
-            this.failedToJoinRoom = true
+            this.failedToJoinRoom.status = true
+            this.failedToJoinRoom.message = message
         }
       })
     },
     createRoom() {
-      socket.emit('create-room', this.user, (success, room) => {
+      socket.emit('create-room', this.user, (success, room, message) => {
         if(success) {
+            console.log(room)
             // Move the user into the room they just created
             this.$router.push(`/room/${room.id}?clk=F`)
 
             this.$roomStore.roomEvents.push("You created this room")
             this.$roomStore.id = room.id
-            this.$roomStore.currentMembers[this.user.socketId] = this.user
+            // this.$roomStore.currentMembers[this.user.spotifyId] = this.user
             this.$roomStore.host = this.user
         }
       })
     }
   },
   async mounted() {
-      // Get user's top 5 tracks
-      this.$userStore.top5 = await getSpotifyTop5Tracks(this.$authStore.accessToken)
+      await this.$userStore.getTop5Tracks(this.$authStore.accessToken)
   }
 }
 </script>

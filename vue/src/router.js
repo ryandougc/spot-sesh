@@ -6,14 +6,17 @@ import Home from './views/Home.vue'
 import Login from './components/Login.vue'
 import PrivacyPolicy from './views/PrivacyPolicy.vue'
 import PageNotFound from './views/PageNotFound.vue'
+import NoBetaAccess from './views/NoBetaAccess.vue'
 
 import { useAuthStore } from './stores/authStore.js'
 import { useUserStore } from './stores/userStore.js'
+import { useRoomStore } from './stores/roomStore'
 
 import ErrorService from './services/ErrorService.js'
 
 import verifyUserAccessToken from './middleware/verifyUserAccessToken'
 import redirectOnInvalidPath from './middleware/redirectOnInvalidPath'
+import checkForBetaAccess from './middleware/checkForBetaAccess.js'
 
 export const router = createRouter({
     history: createWebHistory(import.meta.env.VITE_BASE_URL),
@@ -26,8 +29,17 @@ export const router = createRouter({
                 try {
                     // Get users spotify profile
                     if(useAuthStore().userExists) {
+                        // If fetching profile returns 403 or 401, user doesn't have access to the app in beta mode
+                        const userHasAccess = await checkForBetaAccess(useAuthStore().accessToken)
+
+                        if(!userHasAccess) {
+                            return { name: NoBetaAccess}
+                        }
+
                         await useUserStore().getSpotifyProfile()
                     }
+
+                    // await useRoomStore().leaveRoom()
                 } catch(error) {
                     ErrorService.onError(error)
                 }
@@ -47,6 +59,12 @@ export const router = createRouter({
                     if(code !== null || code !== undefined) {
                         await useAuthStore().getAccessToken(clientId, code, redirectUri)
 
+                        const userHasAccess = await checkForBetaAccess(useAuthStore().accessToken)
+
+                        if(!userHasAccess) {
+                            return { name: NoBetaAccess}
+                        }
+
                         await useUserStore().getSpotifyProfile()
         
                         return { name: Home }
@@ -58,12 +76,15 @@ export const router = createRouter({
         }, {
             path: "/privacypolicy",
             component: PrivacyPolicy,
-            name: PrivacyPolicy
+            name: PrivacyPolicy,
+            // beforeEnter: async () => {
+            //     await useRoomStore().leaveRoom()
+            // }
         }, {
             path: "/room/:roomId",
             component: Room,
             name: Room,
-            beforeEnter: (to) => {
+            beforeEnter: async (to) => {
                 // Remove query param clk=F from path if it exists
                 const regex = /\?[A-Za-z0-9]+=F/
                 to.query = {}
@@ -74,12 +95,16 @@ export const router = createRouter({
             path: '/:pathMatch(.*)*',
             component: PageNotFound,
             name: 404
+        }, {
+            path: '/noBetaAccess',
+            component: NoBetaAccess,
+            name: NoBetaAccess
         }
     ]
 })
 
-router.beforeEach(async () => {
+router.beforeEach(async (to) => {
     await verifyUserAccessToken()
 
-    await redirectOnInvalidPath()
+    await redirectOnInvalidPath(to)
 })

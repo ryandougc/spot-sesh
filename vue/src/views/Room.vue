@@ -98,16 +98,18 @@ export default {
     },
     data() {
         return {
-            usersName: this.$userStore.name,
+            user: this.$userStore.userObject,
             roomId: this.$roomStore.id,
-            roomHost: {
-                name: this.$roomStore.upperCaseHostName,
-                profilePictureUrl: this.$roomStore.host.profilePictureUrl
-            },
             noActiveSessionModalActive: false
         }
     },
     computed: {
+        roomHost() {
+            return {
+                name: this.$roomStore.host.name,
+                profilePictureUrl: this.$roomStore.host.profilePictureUrl
+            }
+        },
         sessionActive() {
             return this.$roomStore.sessionActive
         },
@@ -118,19 +120,16 @@ export default {
             return this.$roomStore.currentMembers ? this.$roomStore.currentMembers : []
         },
         userIsHost() {
-            return this.$roomStore.checkUserIsHost(this.$userStore.socketId)
+            return this.$roomStore.checkUserIsHost(this.$userStore.spotifyId)
         },
     },
     methods: {
         leaveRoom() {
-            socket.emit('leave-room', this.$roomStore.id, success => {
-                if(!success) return console.log("This room could not be found")
-             
-                console.log("Successfully Left") // This 
-
-                this.$router.push('/')
+            socket.emit('leave-room', this.roomId, this.user, (success, data, message) => {
+                if(!success) return console.log(message)
 
                 this.$roomStore.leaveRoom()
+                this.$router.push('/')
             })
         },
         startSession() {
@@ -163,7 +162,11 @@ export default {
         toggleNoActiveSessionModal() {
             this.noActiveSessionModalActive = !this.noActiveSessionModalActive
         }
-    }
+    },
+    beforeRouteLeave() {
+        this.leaveRoom()
+        // this.$roomStore.leaveRoom()
+    },
 }
 </script>
 

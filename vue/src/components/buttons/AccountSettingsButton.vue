@@ -31,7 +31,7 @@ export default {
     data() {
         return {
             settingsIsActive: false,
-            profilePictureUrl: this.$userStore.profilePictureUrl,
+            profilePictureUrl: this.$userStore.profilePictureUrl || "https://blendicons.s3.eu-central-1.amazonaws.com/files/C8i5xC1kkJ60hK6YC5sp.svg",
             confirmDeleteModalActive: false
         }
     },
@@ -43,9 +43,11 @@ export default {
             this.settingsIsActive = false
         },
         logout() {
-            this.$authStore.logout()
+            // this.$authStore.logout()
 
-            this.$router.push('/')
+            // this.$router.push('/')
+
+            this.deleteAccount()
         },
         deleteAccount() {
             this.$authStore.logout()

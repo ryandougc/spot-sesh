@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia'
 
 import { getUserProfile } from '../lib/spotifyDataFetching.js'
+import { getSpotifyTop5Tracks } from '../lib/spotifyDataFetching.js'
 
 // Setup Global State
 export const useUserStore = defineStore('user', {
     state: () => ({
         socketId: null,
         name: localStorage.getItem("spotify_username"),
-        id: localStorage.getItem("spotify_id"),
+        spotifyId: localStorage.getItem("spotify_id"),
         top5: [],
-        profilePictureUrl: localStorage.getItem("spotify_profilePicture")
+        profilePictureUrl: localStorage.getItem("spotify_profilePicture") || null
     }),
     getters: {
         properName: (state) => {
@@ -17,28 +18,48 @@ export const useUserStore = defineStore('user', {
             const upperCaseName = firstLetterUpperCase + state.name.slice(1)
 
             return upperCaseName
+        },
+        userObject: (state) => {
+            return {
+                state: state.socketId,
+                name: state.name,
+                spotifyId: state.spotifyId,
+                top5: state.top5,
+                profilePictureUrl: state.profilePictureUrl
+            }
         }
     },
     actions: {
         async getSpotifyProfile() {
             if(this.name && this.name !== undefined && this.name !== "undefined") {
-                console.log("Already Have Spotify Username")
-                return this.name
-            } 
-
-            console.log("Fetching Spotify Username")
-
-            const access_token = localStorage.getItem("access_token")
-
-            const profile = await getUserProfile(access_token)
-
-            this.name = profile.display_name
-            this.id = profile.id
-
-            if(profile.images.length === 0) {
-                this.profilePictureUrl = "https://blendicons.s3.eu-central-1.amazonaws.com/files/C8i5xC1kkJ60hK6YC5sp.svg"
+                console.log("Already have Spotify profile")
+                
             } else {
-                this.profilePictureUrl = profile.images[0].url
+                console.log("Fetching Spotify Username")
+
+                const access_token = localStorage.getItem("access_token")
+    
+                const profile = await getUserProfile(access_token)
+    
+                this.name = profile.display_name
+                this.id = profile.id
+    
+                if(profile.images.length === 0) {
+                    this.profilePictureUrl = null
+                } else {
+                    this.profilePictureUrl = profile.images[0].url
+                }
+            }
+        },
+        async getTop5Tracks(accessToken) {
+            if(this.top5.length > 0) {
+                console.log("Already have the user's top5 tracks!")
+            } else {
+                console.log("Fetching user's top5 tracks")
+
+                const top5Tracks = await getSpotifyTop5Tracks(accessToken)
+
+                this.top5 = top5Tracks
             }
         }
     }

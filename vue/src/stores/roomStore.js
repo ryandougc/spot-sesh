@@ -21,24 +21,30 @@ export const useRoomStore = defineStore('room', {
         }
     },
     actions: {
-        checkUserInRoom(userSocketId) {
-            const user = this.currentMembers[userSocketId]
+        removeMember(spotifyId) {
+            console.log("Here")
+            console.log(this.currentMembers[spotifyId])
+            delete this.currentMembers[spotifyId]
+        },
+        checkUserInRoom(spotifyId) {
+            const userIsInRoom = this.currentMembers[spotifyId]
 
-            if(user || user !== undefined) {
+            if(userIsInRoom || userIsInRoom !== undefined) {
                 return false
             } else {
                 return true
             }
         },
-        checkUserIsHost(userSocketId) {
-            return this.host !== null && userSocketId === this.host.socketId ? true : false
+        checkUserIsHost(userSpotifyId) {
+            return this.host !== null && userSpotifyId === this.host.spotifyId ? true : false
         },
         leaveRoom() {
             this.id = null,
             this.name = null,
             this.host = null,
             this.currentMembers = {},
-            this.roomEvents = []
+            this.roomEvents = [],
+            this.sessionActive = false
         }
     }
 })

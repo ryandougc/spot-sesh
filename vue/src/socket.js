@@ -23,19 +23,22 @@ socket.io.on("error", error => {
 
   timeout.socketTimeout = setTimeout(() => {
     ErrorService.onError(error)
-  }, "6000")
+  }, "10000")
 })
 
-// socket.on("connect", () => {
-//   if (socket.recovered) {
-//     console.log("Session Recovered")
-//     // any event missed during the disconnection period will be received now
-//   } else {
-//     console.log("We lost the session")
-//     // new or unrecoverable session
-//     useUserStore().socketId = socket.id
-//   }
-// })
+socket.on("connect", () => {
+  clearTimeout(timeout.socketTimeout)
+  delete timeout.socketTimeout
+
+  console.log("Connected to socket.io")
+
+  if (socket.recovered) {
+    console.log("Session Recovered")
+    // any event missed during the disconnection period will be received now
+  } else {
+    // new or unrecoverable session
+  }
+});
 
 // socket.on("disconnect", () => {
 //   console.log("User has disconnected")
@@ -44,10 +47,10 @@ socket.io.on("error", error => {
 socket.on('user-joined-room', user => {
   try {
     useRoomStore().roomEvents.push(`${user.name} has joined the room`)
-    useRoomStore().currentMembers[user.socketId] = user
+    useRoomStore().currentMembers[user.spotifyId] = user
   } catch(error) {
     console.log("There was an error when updating the page to show a new user was added to the room")
-    throw new Error(error)
+    ErrorService.onError(error)
   }
 })
 
@@ -55,24 +58,25 @@ socket.on('change-room-host', host => {
   try {
     useRoomStore().host = host
 
-    if(socket.id === host.socketId) {
+    if(useUserStore().spotifyId === host.spotifyId) {
       useRoomStore().roomEvents.push(`You are now the host`)
+      delete useRoomStore().removeMember(host.spotifyId)
     } else {
       useRoomStore().roomEvents.push(`${host.name} is now the host`)
     }
   } catch(error) {
     console.log("There was an error when updating the room host")
-    throw new Error(error)
+    ErrorService.onError(error)
   }
 })
 
 socket.on('user-left-room', user => {
   try {
-      delete useRoomStore().currentMembers[user.socketId]
+      delete useRoomStore().currentMembers[user.spotifyId]
       useRoomStore().roomEvents.push(`${user.name} has left the room`)
   } catch(error) {
     console.log("There was an error when deleting the user that left the room")
-    throw new Error(error)
+    ErrorService.onError(error)
   }
 })
 
@@ -82,6 +86,6 @@ socket.on('session-started', _ => {
     useRoomStore().roomEvents.push('Listening session has started')
   } catch(error) {
     console.log("There was an error when updating the page to show the session has started")
-    throw new Error(error)
+    ErrorService.onError(error)
   }
 })
