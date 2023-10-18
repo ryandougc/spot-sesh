@@ -6,8 +6,10 @@ export default async (to) => {
         const regex = /\/room\/[A-Za-z0-9]+/i
 
         if(to.path.match(regex) && (to.query.clk !== "F" || to.query.clk === undefined)) {
-            return { name: Home }
+            return true
         }
+
+        return false
     } catch(error) {
         ErrorService.onError(error)
     }

@@ -103,5 +103,7 @@ export const router = createRouter({
 router.beforeEach(async (to) => {
     await verifyUserAccessToken()
 
-    await redirectOnInvalidPath(to)
+    if(await redirectOnInvalidPath(to) === true) {
+        return { name: Home }
+    }
 })
