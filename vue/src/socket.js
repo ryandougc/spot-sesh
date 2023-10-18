@@ -36,6 +36,7 @@ socket.on("connect", () => {
     console.log("Session Recovered")
     // any event missed during the disconnection period will be received now
   } else {
+    console.log("Session Lost")
     // new or unrecoverable session
   }
 });
@@ -60,7 +61,6 @@ socket.on('change-room-host', host => {
 
     if(useUserStore().spotifyId === host.spotifyId) {
       useRoomStore().roomEvents.push(`You are now the host`)
-      delete useRoomStore().removeMember(host.spotifyId)
     } else {
       useRoomStore().roomEvents.push(`${host.name} is now the host`)
     }
@@ -70,9 +70,9 @@ socket.on('change-room-host', host => {
   }
 })
 
-socket.on('user-left-room', user => {
+socket.on('user-left-room', ({room, user}) => {
   try {
-      delete useRoomStore().currentMembers[user.spotifyId]
+      useRoomStore().removeMember(user.spotifyId, room.currentMembers)
       useRoomStore().roomEvents.push(`${user.name} has left the room`)
   } catch(error) {
     console.log("There was an error when deleting the user that left the room")

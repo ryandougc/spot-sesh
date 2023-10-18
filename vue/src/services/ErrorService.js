@@ -22,6 +22,8 @@ export default class ErrorService {
         //     }
         // })
 
+        console.log(error)
+
         throw new Error(error)
     }
 

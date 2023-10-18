@@ -4,44 +4,60 @@ import { defineStore } from 'pinia'
 export const useRoomStore = defineStore('room', {
     state: () => ({
         id: null,
-        name: null,
-        host: null,
+        host: {},
         currentMembers: {},
         roomEvents: [],
         sessionActive: false
     }),
     getters: {
         upperCaseHostName: (state) => {
-            if(!state.host) return null
+            if(!state.host || state.host.name === undefined) return null
             
             const firstLetterUpperCase = state.host.name.charAt(0).toUpperCase()
             const upperCaseName = firstLetterUpperCase + state.host.name.slice(1)
 
             return upperCaseName
+        },
+        getRoomObject: (state) => {
+            return {
+                id: state.id,
+                host: state.host,
+                currentMembers: state.currentMembers,
+                roomEvents: state.roomEvents,
+                sessionActive: state.sessionActive
+            }
         }
     },
     actions: {
-        removeMember(spotifyId) {
-            console.log("Here")
-            console.log(this.currentMembers[spotifyId])
-            delete this.currentMembers[spotifyId]
-        },
-        checkUserInRoom(spotifyId) {
-            const userIsInRoom = this.currentMembers[spotifyId]
+        removeMember(spotifyId, roomMembers) {
+            this.currentMembers = roomMembers
+            // this.currentMembers = this.currentMembers.filter((member) => {
+            //     member.spotifyId != spotifyId;
+            //   });
 
-            if(userIsInRoom || userIsInRoom !== undefined) {
-                return false
-            } else {
-                return true
-            }
+            // this.currentMembers = this.currentMembers.filter(e => !(e.spotifyId === spotifyId))
+
         },
-        checkUserIsHost(userSpotifyId) {
-            return this.host !== null && userSpotifyId === this.host.spotifyId ? true : false
+        // checkUserInRoom(spotifyId) {
+        //     console.log(this.currentMembers[spotifyId])
+        //     const userIsMemberInRoom = this.currentMembers[spotifyId]
+        //     const userIsHostOfRoom = this.host.spotifyId = spotifyId
+
+        //     if(userIsMemberInRoom || userIsHostOfRoom) {
+        //         return true
+        //     } else {
+        //         return false
+        //     }
+        // },
+        checkUserIsHost(spotifyId) {
+            console.log(this.host.spotifyId)
+            const userIsHostOfRoom = this.host.spotifyId = spotifyId
+            
+            return userIsHostOfRoom ? true : false
         },
         leaveRoom() {
             this.id = null,
-            this.name = null,
-            this.host = null,
+            this.host = {},
             this.currentMembers = {},
             this.roomEvents = [],
             this.sessionActive = false

@@ -2,7 +2,7 @@
   <div id="lobby">
     <HeaderLogin />
   
-    <h3 class="greeting">Hi {{ $userStore.properName }}!</h3>
+    <h3 class="greeting">Hi {{ $userStore.upperCaseName }}!</h3>
 
     <div class="lobby-content">
         <div class="lobby-content__create-session">
@@ -55,13 +55,14 @@ export default {
       failedToJoinRoom: {
         status: false,
         message: ""
-      }
+      },
+      user: this.$userStore.userObject
     }
   },
   computed: {
-    user() {
-      return this.$userStore.userObject
-    }
+    // user() {
+    //   return this.$userStore.userObject
+    // }
   },
   methods: {
     joinRoom() {
@@ -70,6 +71,7 @@ export default {
             // Move the user into the room they just created
             this.$router.push(`/room/${room.id}?clk=F`)
 
+            console.log("Joining Room")
             console.log(room)
 
             this.$roomStore.roomEvents.push("You joined")
@@ -86,6 +88,7 @@ export default {
     createRoom() {
       socket.emit('create-room', this.user, (success, room, message) => {
         if(success) {
+            console.log("Creating Room")
             console.log(room)
             // Move the user into the room they just created
             this.$router.push(`/room/${room.id}?clk=F`)

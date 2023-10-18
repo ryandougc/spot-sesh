@@ -21,23 +21,25 @@ export default function (io) {
         //     // new or unrecoverable session
         // }
 
-        socket.on('join-room', (room, user, cb) => {
+        socket.on('join-room', (roomId, user, cb) => {
             try {
-                if(rooms[room] === undefined) {
+                const room = rooms[roomId]
+
+                if(room === undefined) {
                     return cb(false, null, "That room doesn't exist!")
                 }
 
-                if(rooms[room].members[user.spotifyId] || rooms[room].host.spotifyId === user.spotifyId) {
+                if(room.members[user.spotifyId] || room.host.spotifyId === user.spotifyId) {
                     return cb(false, null, "You are already in that room!")
                 }
 
-                socket.join(room)
+                socket.join(room.id)
     
-                addUserToRoomInMemory(room, user)
+                addUserToRoomInMemory(room.id, user)
 
-                socket.to(room).emit('user-joined-room', user)
+                socket.to(room.id).emit('user-joined-room', user)
 
-                return cb(true, rooms[room])
+                return cb(true, room)
             } catch(error) {
                 logger.log({ 
                     level: 'error',
@@ -53,23 +55,21 @@ export default function (io) {
     
         socket.on('create-room', (user, cb) => {
             try {
-                // let room = generateRandomString(6)
-                let room = user.name
+                let roomId = user.name  // let room = generateRandomString(6)
 
-                while(rooms[room]) { // If a room exists with the user's Spotify username as the ID, generate a random ID for the new room
-                    room = generateRandomString(6)
-                    // room = user.name
+                while(rooms[roomId]) { // If a room exists with the user's Spotify username as the ID, generate a random ID for the new room
+                    roomId = generateRandomString(6)
                 }
 
-                socket.join(room)
+                socket.join(roomId)
         
-                rooms[room] = { // Add new room to memory
-                    id: room,
+                rooms[roomId] = { // Add new room to memory
+                    id: roomId,
                     host: user,
                     members: {}
                 }
         
-                cb(true, rooms[room])
+                cb(true, rooms[roomId])
             } catch(error) {
                 logger.log({ 
                     level: 'error',
@@ -85,12 +85,15 @@ export default function (io) {
 
         socket.on('start-session-request', (roomId, cb) => {
             const trackList = []
-            
+
             try {
                 // Compile all members' top5 songs
                 for(const [id, user] of Object.entries(rooms[roomId].members)) {
                     trackList.push(...user.top5)
                 }
+
+                // Get hosts top5 songs
+                trackList.push(...rooms[roomId].host.top5)
     
                 cb(true, trackList)
             } catch(error) {
@@ -125,23 +128,34 @@ export default function (io) {
 
         })
     
-        socket.on('leave-room', (room, user, cb) => {
+        socket.on('leave-room', (roomId, user, cb) => {
             try {
-                if(!rooms[room]) cb(false, null, "The room you are trying to leave does not exist")
-    
-                // const user = rooms[room].members[user.spotifyId]
-    
-                removeUserFromRoomInMemory(room, user.spotifyId)
-        
-                socket.leave(room)
+                const room = rooms[roomId]
 
-                socket.to(room).emit('user-left-room', user)
+                if(!room) cb(false, null, "The room you are trying to leave does not exist")
 
-                if(rooms[room].host.spotifyId === user.spotifyId) {
+                if(room.host.spotifyId === user.spotifyId && Object.keys(room.members).length > 0) {
+                    reassignHostToRandomMember(room) 
+
                     console.log("Host Left!")
-                    reassignHostToRandomMember(room, socket) 
+
+                    socket.to(room.id).emit('change-room-host', room.host)
+                } else if(room.host.spotifyId === user.spotifyId) {
+                    delete rooms[room.id]
+
+                    console.log("No members left in room, room deleted")
+                } else {
+                    removeUserFromRoomInMemory(room, user.spotifyId)
+
+                    console.log("User Left Room")
                 }
-    
+
+                socket.leave(room.id)
+
+                socket.to(room.id).emit('user-left-room', {room, user})
+
+                console.log(rooms)
+
                 // if(Object.keys(rooms[room].members).length <= 0) {
                 //     // If no members are left in the room, delete the room.
                 //     delete rooms[room]
@@ -166,67 +180,66 @@ export default function (io) {
             }
         })
     
-        socket.on('disconnecting', () => {
-            try {
-                console.log("Disconnected")
+        socket.on('disconnecting', (a) => {
+            console.log("User Disconnected")
+            // try {
+            //     console.log("Disconnected")
 
-                socket.rooms.forEach(room => {
-                    if(rooms[room]) {
-                        // loop over members to find the user that just left and remove them from the room
-                        for(let m in rooms[room].members) {
-                            if(m.socketId === socket.id) {
-                                console.log(m)
-                            }
-                        }
+            //     socket.rooms.forEach(room => {
+            //         if(rooms[room]) {
+            //             // loop over members to find the user that just left and remove them from the room
+            //             for(let m in rooms[room].members) {
+            //                 if(m.socketId === socket.id) {
+            //                     console.log(m)
+            //                 }
+            //             }
 
 
 
 
-                        const usersName = rooms[room].members[socket.id].name
+            //             const usersName = rooms[room].members[socket.id].name
         
-                        removeUserFromRoomInMemory(room, socket.id)
+            //             removeUserFromRoomInMemory(room, socket.id)
 
-                        socket.leave(room)
+            //             socket.leave(room)
         
-                        if(Object.keys(rooms[room].members).length <= 0) {
-                            delete rooms[room]
-                        } else {
-                            socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
+            //             if(Object.keys(rooms[room].members).length <= 0) {
+            //                 delete rooms[room]
+            //             } else {
+            //                 socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
         
-                            reassignHostToRandomMember(room, socket)
-                        }
-                    }
-                })
-            } catch(error) {
-                logger.log({ 
-                    level: 'error',
-                    type: error.name,
-                    message: error.message,
-                    stack: error.stack
-                })
+            //                 reassignHostToRandomMember(room, socket)
+            //             }
+            //         }
+            //     })
+            // } catch(error) {
+            //     logger.log({ 
+            //         level: 'error',
+            //         type: error.name,
+            //         message: error.message,
+            //         stack: error.stack
+            //     })
 
-            }
+            // }
         })
     })
 }
 
-function removeUserFromRoomInMemory(room, id) {
-    delete rooms[room].members[id]
-    if(rooms[room].members <= 0) delete rooms[room]
+function removeUserFromRoomInMemory(room, spotifyId) {
+    if(room.members[spotifyId]) delete room.members[spotifyId]
 }
 
-function addUserToRoomInMemory(room, user) {
-    rooms[room].members[user.spotifyId] = user
+function addUserToRoomInMemory(roomId, user) {
+    rooms[roomId].members[user.spotifyId] = user
 }
 
-function reassignHostToRandomMember(room, socket) {
-        const members = Object.keys(rooms[room].members)
+function reassignHostToRandomMember(room) {
+    const members = Object.keys(room.members)
+    const randomMember = members[members.length * Math.random() << 0]
 
-        if(members.length >= 0) {
-            const newHost = rooms[room].members[members[ members.length * Math.random() << 0]]
+    const newHost = room.members[randomMember]
 
-            rooms[room].host = newHost
-    
-            socket.to(room).emit('change-room-host', newHost)
-        }
+    room.host = newHost
+
+    removeUserFromRoomInMemory(room, newHost.spotifyId)
 }

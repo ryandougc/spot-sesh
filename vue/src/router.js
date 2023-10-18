@@ -25,23 +25,23 @@ export const router = createRouter({
             path: "/",
             component: Home,
             name: Home,
-            beforeEnter: async () => {
+            beforeEnter: async (to) => {
                 try {
                     // Get users spotify profile
-                    if(useAuthStore().userExists) {
+                    if(useAuthStore().userExists && to.name !== "NoBetaAccess") {
                         // If fetching profile returns 403 or 401, user doesn't have access to the app in beta mode
                         const userHasAccess = await checkForBetaAccess(useAuthStore().accessToken)
 
                         if(!userHasAccess) {
-                            return { name: NoBetaAccess}
+                            return { name: NoBetaAccess }
                         }
 
                         await useUserStore().getSpotifyProfile()
                     }
-
                     // await useRoomStore().leaveRoom()
                 } catch(error) {
-                    ErrorService.onError(error)
+                    // ErrorService.onError(error)
+                    throw new Error(error)
                 }
             }
         }, {
@@ -76,10 +76,7 @@ export const router = createRouter({
         }, {
             path: "/privacypolicy",
             component: PrivacyPolicy,
-            name: PrivacyPolicy,
-            // beforeEnter: async () => {
-            //     await useRoomStore().leaveRoom()
-            // }
+            name: PrivacyPolicy
         }, {
             path: "/room/:roomId",
             component: Room,

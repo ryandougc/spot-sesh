@@ -9,11 +9,11 @@ export const useUserStore = defineStore('user', {
         socketId: null,
         name: localStorage.getItem("spotify_username"),
         spotifyId: localStorage.getItem("spotify_id"),
-        top5: [],
+        top5: localStorage.getItem("top5_songs") || [],
         profilePictureUrl: localStorage.getItem("spotify_profilePicture") || null
     }),
     getters: {
-        properName: (state) => {
+        upperCaseName: (state) => {
             const firstLetterUpperCase = state.name.charAt(0).toUpperCase()
             const upperCaseName = firstLetterUpperCase + state.name.slice(1)
 
@@ -21,7 +21,7 @@ export const useUserStore = defineStore('user', {
         },
         userObject: (state) => {
             return {
-                state: state.socketId,
+                socketId: state.socketId,
                 name: state.name,
                 spotifyId: state.spotifyId,
                 top5: state.top5,

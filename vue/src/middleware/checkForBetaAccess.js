@@ -21,5 +21,7 @@ export default async (accessToken) => {
 
             return false
         }
+
+        throw new Error(error)
     }
 }

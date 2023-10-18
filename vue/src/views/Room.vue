@@ -5,15 +5,15 @@
         <BackButton class="room__back-button" @click="leaveRoom" />
 
         <div class="room__information">
-            <p class="room__information__page-title">{{ roomHost.name }}'s Room</p>
+            <p class="room__information__page-title">{{ room.host.name }}'s Room</p>
             <p 
-                v-if="!userIsHost && !sessionActive"
+                v-if="!userIsHost && !room.sessionActive"
                 class="room__information__session-status"
             >
                 Waiting on your host to start playing the music
             </p>
             <p 
-                v-if="!userIsHost && sessionActive"
+                v-if="!userIsHost && room.sessionActive"
                 class="room__information__session-status"
             >
                 Listening session has already started
@@ -24,8 +24,8 @@
                     <p class="room__information__users-section__host__title section-title">HOST</p>
                     <div class="room__information__users-section__host__user-card">
                         <UserListItem
-                            :usersName="roomHost.name"
-                            :profilePictureUrl="roomHost.profilePictureUrl" 
+                            :usersName="room.host.name"
+                            :profilePictureUrl="room.host.profilePictureUrl" 
                         />
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                 <div class="room__information__users-section__members">
                     <p class="room__information__users-section__members__title section-title">MEMBERS</p>
                     <ul class="room__information__users-section__members__list">
-                        <li v-for="member in roomMembers" :key="member" >
+                        <li v-for="member in room.currentMembers" :key="member" >
                             <UserListItem
                                 :usersName="member.name"
                                 :profilePictureUrl="member.profilePictureUrl" 
@@ -46,7 +46,7 @@
             <div class="room__information__messages-section">
                 <p class="room__information__messages-section__title section-title">MESSAGES</p>
                 <ul>
-                    <li v-for="event in roomEvents" :key="event" >
+                    <li v-for="event in room.roomEvents" :key="event" >
                         {{ event }}
                     </li>
                 </ul>
@@ -57,14 +57,14 @@
         <div class="room__start-listening-section">
             <button 
                 class="room__start-listening-section__button button-large"
-                v-if="userIsHost && !sessionActive"
+                v-if="userIsHost && !room.sessionActive"
                 @click="startSession"
             >
                 Start Listening
             </button>
             <p
                 class="room__start-listening-section__session-started-text"
-                v-if="userIsHost && sessionActive"
+                v-if="userIsHost && room.sessionActive"
             >
                 You already started a listening session
             </p>
@@ -99,33 +99,36 @@ export default {
     data() {
         return {
             user: this.$userStore.userObject,
-            roomId: this.$roomStore.id,
+            // roomId: this.$roomStore.id,
             noActiveSessionModalActive: false
         }
     },
     computed: {
-        roomHost() {
-            return {
-                name: this.$roomStore.host.name,
-                profilePictureUrl: this.$roomStore.host.profilePictureUrl
-            }
+        room() {
+            return this.$roomStore.getRoomObject
         },
-        sessionActive() {
-            return this.$roomStore.sessionActive
-        },
-        roomEvents() {
-            return this.$roomStore.roomEvents ? this.$roomStore.roomEvents : []
-        },
-        roomMembers() {
-            return this.$roomStore.currentMembers ? this.$roomStore.currentMembers : []
-        },
+        // roomHost() {
+        //     return {
+        //         name: this.$roomStore.host.name || null,
+        //         profilePictureUrl: this.$roomStore.host.profilePictureUrl
+        //     }
+        // },
+        // sessionActive() {
+        //     return this.$roomStore.sessionActive
+        // },
+        // roomEvents() {
+        //     return this.$roomStore.roomEvents ? this.$roomStore.roomEvents : []
+        // },
+        // currentMembers() {
+        //     return this.$roomStore.currentMembers ? this.$roomStore.currentMembers : []
+        // },
         userIsHost() {
             return this.$roomStore.checkUserIsHost(this.$userStore.spotifyId)
         },
     },
     methods: {
         leaveRoom() {
-            socket.emit('leave-room', this.roomId, this.user, (success, data, message) => {
+            socket.emit('leave-room', this.room.id, this.user, (success, data, message) => {
                 if(!success) return console.log(message)
 
                 this.$roomStore.leaveRoom()
@@ -133,7 +136,7 @@ export default {
             })
         },
         startSession() {
-            socket.emit('start-session-request', this.$roomStore.id, async (success, trackList) => {
+            socket.emit('start-session-request', this.room.id, async (success, trackList) => {
                 try {
                     if(success) {
                         const shuffledTracklist = shuffleArray(trackList)
@@ -146,11 +149,11 @@ export default {
                             // alert('You need to have an active device availalble for Spotify. Open Spotify and start playing a song on the device you want the session to play on. Then come back here and press the "Start Session" button.')
                             this.toggleNoActiveSessionModal()
                         } else {
-                            socket.emit('start-session', this.$roomStore.id, () => {
-                                this.$roomStore.roomEvents.push('You have started a listening session')
+                            // socket.emit('start-session', this.$roomStore.id, () => {
+                            //     this.$roomStore.roomEvents.push('You have started a listening session')
 
-                                this.$roomStore.sessionActive = true
-                            })
+                            //     this.$roomStore.sessionActive = true
+                            // })
                         }
                     }
                 } catch(error) {
@@ -164,8 +167,8 @@ export default {
         }
     },
     beforeRouteLeave() {
-        this.leaveRoom()
-        // this.$roomStore.leaveRoom()
+        // this.leaveRoom()
+        this.$roomStore.leaveRoom()
     },
 }
 </script>

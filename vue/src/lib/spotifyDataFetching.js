@@ -56,7 +56,6 @@ export async function getUserProfile(accessToken) {
         })
     
         const spotifyProfile = await result.json()
-        console.log(spotifyProfile)
 
         const spotifyUsername = spotifyProfile.display_name
         const spotifyId = spotifyProfile.id
