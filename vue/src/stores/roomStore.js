@@ -50,10 +50,7 @@ export const useRoomStore = defineStore('room', {
         //     }
         // },
         checkUserIsHost(spotifyId) {
-            console.log(this.host.spotifyId)
-            const userIsHostOfRoom = this.host.spotifyId = spotifyId
-            
-            return userIsHostOfRoom ? true : false
+            return this.host.spotifyId === spotifyId ? true : false
         },
         leaveRoom() {
             this.id = null,
