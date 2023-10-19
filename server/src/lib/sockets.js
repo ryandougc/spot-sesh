@@ -153,18 +153,6 @@ export default function (io) {
                 socket.leave(room.id)
 
                 socket.to(room.id).emit('user-left-room', {room, user})
-
-                console.log(rooms)
-
-                // if(Object.keys(rooms[room].members).length <= 0) {
-                //     // If no members are left in the room, delete the room.
-                //     delete rooms[room]
-                // } else {
-                //     // If there are members left in the room, perform the logic for user leaving
-                //     socket.to(room).emit('user-left-room', user)
-            
-                //     reassignHostToRandomMember(room, socket) 
-                // }
         
                 cb(true)
             } catch(error) {

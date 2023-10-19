@@ -88,6 +88,8 @@ import UserListItem from "../components/UserListItem.vue"
 import BackButton from "../components/buttons/BackButton.vue"
 import NoActiveSession from '../components/modals/NoActiveSession.vue'
 
+import ErrorService from "../services/ErrorService.js"
+
 export default {
     components: {
         HeaderLogin,
@@ -107,21 +109,6 @@ export default {
         room() {
             return this.$roomStore.getRoomObject
         },
-        // roomHost() {
-        //     return {
-        //         name: this.$roomStore.host.name || null,
-        //         profilePictureUrl: this.$roomStore.host.profilePictureUrl
-        //     }
-        // },
-        // sessionActive() {
-        //     return this.$roomStore.sessionActive
-        // },
-        // roomEvents() {
-        //     return this.$roomStore.roomEvents ? this.$roomStore.roomEvents : []
-        // },
-        // currentMembers() {
-        //     return this.$roomStore.currentMembers ? this.$roomStore.currentMembers : []
-        // },
         userIsHost() {
             return this.$roomStore.checkUserIsHost(this.$userStore.spotifyId)
         },
@@ -165,6 +152,52 @@ export default {
         toggleNoActiveSessionModal() {
             this.noActiveSessionModalActive = !this.noActiveSessionModalActive
         }
+    },
+    created() {
+        socket.on('user-joined-room', user => {
+            try {
+                this.$roomStore.currentMembers[user.spotifyId] = user
+                this.$roomStore.roomEvents.push(`${user.name} has joined the room`)
+            } catch(error) {
+                console.log("There was an error when updating the page to show a new user was added to the room")
+                ErrorService.onError(error)
+            }
+        })
+
+        socket.on('change-room-host', host => {
+            try {
+                this.$roomStore.host = host
+
+                if(this.$userStore.spotifyId === host.spotifyId) {
+                    this.$roomStore.roomEvents.push(`You are now the host`)
+                } else {
+                    this.$roomStore.roomEvents.push(`${host.name} is now the host`)
+                }
+            } catch(error) {
+                console.log("There was an error when updating the room host")
+                ErrorService.onError(error)
+            }
+        })
+
+        socket.on('user-left-room', ({room, user}) => {
+            try {
+                this.$roomStore.removeMember(user.spotifyId, room.members)
+                this.$roomStore.roomEvents.push(`${user.name} has left the room`)
+            } catch(error) {
+                console.log("There was an error when deleting the user that left the room")
+                ErrorService.onError(error)
+            }
+        })
+
+        socket.on('session-started', _ => {
+            try {
+                this.$roomStore.sessionActive = true
+                this.$roomStore.roomEvents.push('Listening session has started')
+            } catch(error) {
+                console.log("There was an error when updating the page to show the session has started")
+                ErrorService.onError(error)
+            }
+        })
     },
     beforeRouteLeave() {
         // this.leaveRoom()

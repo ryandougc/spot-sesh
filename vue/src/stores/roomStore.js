@@ -31,24 +31,7 @@ export const useRoomStore = defineStore('room', {
     actions: {
         removeMember(spotifyId, roomMembers) {
             this.currentMembers = roomMembers
-            // this.currentMembers = this.currentMembers.filter((member) => {
-            //     member.spotifyId != spotifyId;
-            //   });
-
-            // this.currentMembers = this.currentMembers.filter(e => !(e.spotifyId === spotifyId))
-
         },
-        // checkUserInRoom(spotifyId) {
-        //     console.log(this.currentMembers[spotifyId])
-        //     const userIsMemberInRoom = this.currentMembers[spotifyId]
-        //     const userIsHostOfRoom = this.host.spotifyId = spotifyId
-
-        //     if(userIsMemberInRoom || userIsHostOfRoom) {
-        //         return true
-        //     } else {
-        //         return false
-        //     }
-        // },
         checkUserIsHost(spotifyId) {
             return this.host.spotifyId === spotifyId ? true : false
         },

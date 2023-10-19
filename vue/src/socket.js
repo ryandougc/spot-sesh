@@ -1,8 +1,6 @@
 import { io } from "socket.io-client";
 
-import { useUserStore } from './stores/userStore.js'
-import { useRoomStore } from './stores/roomStore.js'
-import ErrorService from "./services/ErrorService.js";
+import ErrorService from "./services/ErrorService.js"
 
 const timeout = {
   socketTimeout: null
@@ -40,52 +38,3 @@ socket.on("connect", () => {
     // new or unrecoverable session
   }
 });
-
-// socket.on("disconnect", () => {
-//   console.log("User has disconnected")
-// })
-
-socket.on('user-joined-room', user => {
-  try {
-    useRoomStore().roomEvents.push(`${user.name} has joined the room`)
-    useRoomStore().currentMembers[user.spotifyId] = user
-  } catch(error) {
-    console.log("There was an error when updating the page to show a new user was added to the room")
-    ErrorService.onError(error)
-  }
-})
-
-socket.on('change-room-host', host => {
-  try {
-    useRoomStore().host = host
-
-    if(useUserStore().spotifyId === host.spotifyId) {
-      useRoomStore().roomEvents.push(`You are now the host`)
-    } else {
-      useRoomStore().roomEvents.push(`${host.name} is now the host`)
-    }
-  } catch(error) {
-    console.log("There was an error when updating the room host")
-    ErrorService.onError(error)
-  }
-})
-
-socket.on('user-left-room', ({room, user}) => {
-  try {
-      useRoomStore().removeMember(user.spotifyId, room.currentMembers)
-      useRoomStore().roomEvents.push(`${user.name} has left the room`)
-  } catch(error) {
-    console.log("There was an error when deleting the user that left the room")
-    ErrorService.onError(error)
-  }
-})
-
-socket.on('session-started', _ => {
-  try {
-    useRoomStore().sessionActive = true
-    useRoomStore().roomEvents.push('Listening session has started')
-  } catch(error) {
-    console.log("There was an error when updating the page to show the session has started")
-    ErrorService.onError(error)
-  }
-})
