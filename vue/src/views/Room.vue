@@ -180,6 +180,7 @@ export default {
         })
 
         socket.on('user-left-room', ({room, user}) => {
+            console.log("LEvGIN")
             try {
                 this.$roomStore.removeMember(user.spotifyId, room.members)
                 this.$roomStore.roomEvents.push(`${user.name} has left the room`)
@@ -202,6 +203,10 @@ export default {
     beforeRouteLeave() {
         // this.leaveRoom()
         this.$roomStore.leaveRoom()
+        socket.off('user-joined-room')
+        socket.off('change-room-host')
+        socket.off('user-left-room')
+        socket.off('session-started')
     },
 }
 </script>
