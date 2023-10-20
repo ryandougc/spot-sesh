@@ -55,14 +55,13 @@ export default {
       failedToJoinRoom: {
         status: false,
         message: ""
-      },
-      user: this.$userStore.userObject
+      }
     }
   },
   computed: {
-    // user() {
-    //   return this.$userStore.userObject
-    // }
+    user() {
+        return this.$userStore.userObject
+    }
   },
   methods: {
     joinRoom() {
@@ -74,10 +73,7 @@ export default {
             console.log("Joining Room")
             console.log(room)
 
-            this.$roomStore.roomEvents.push("You joined")
-            this.$roomStore.id = room.id
-            this.$roomStore.currentMembers = room.members
-            this.$roomStore.host = room.host
+            this.$roomStore.currentUserJoinedRoom(room)
         } else {
             this.sessionToJoin = ""
             this.failedToJoinRoom.status = true
@@ -90,19 +86,18 @@ export default {
         if(success) {
             console.log("Creating Room")
             console.log(room)
+
+            this.$roomStore.currentUserCreatedRoom(room)
+
             // Move the user into the room they just created
             this.$router.push(`/room/${room.id}?clk=F`)
-
-            this.$roomStore.roomEvents.push("You created this room")
-            this.$roomStore.id = room.id
-            // this.$roomStore.currentMembers[this.user.spotifyId] = this.user
-            this.$roomStore.host = this.user
         }
       })
     }
   },
   async mounted() {
-      await this.$userStore.getTop5Tracks(this.$authStore.accessToken)
+    await this.$userStore.getTop5Tracks(this.$authStore.accessToken)
+    this.user.socketId = socket.id
   }
 }
 </script>

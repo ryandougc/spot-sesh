@@ -29,8 +29,14 @@ export const useRoomStore = defineStore('room', {
         }
     },
     actions: {
-        removeMember(spotifyId, roomMembers) {
+        removeMember(roomMembers, usersName) {
             this.currentMembers = roomMembers
+
+            this.roomEvents.push(`${usersName} has left the room`)
+        },
+        addMember(user) {
+            this.currentMembers[user.spotifyId] = user
+            this.addRoomEvent(`${user.name} has joined the room`)
         },
         checkUserIsHost(spotifyId) {
             return this.host.spotifyId === spotifyId ? true : false
@@ -41,6 +47,30 @@ export const useRoomStore = defineStore('room', {
             this.currentMembers = {},
             this.roomEvents = [],
             this.sessionActive = false
+        },
+        addRoomEvent(event) {
+            this.roomEvents.push(event)
+        },
+        startListeningSession(eventMessage) {
+            this.roomEvents.push(eventMessage)
+
+            this.sessionActive = true
+        },
+        currentUserJoinedRoom(room) {
+            this.id = room.id
+            this.currentMembers = room.members
+            this.host = room.host
+
+            this.addRoomEvent("You joined")
+        },
+        currentUserCreatedRoom(room) {
+            this.id = room.id
+            this.host = room.host
+
+            this.roomEvents.push("You created this room")
+        },
+        changeRoomHost(newHost) {
+            this.host = newHost
         }
-    }
+    },
 })

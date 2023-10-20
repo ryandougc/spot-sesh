@@ -9,7 +9,7 @@ export const useUserStore = defineStore('user', {
         socketId: null,
         name: localStorage.getItem("spotify_username"),
         spotifyId: localStorage.getItem("spotify_id"),
-        top5: localStorage.getItem("top5_songs") || [],
+        top5: [],
         profilePictureUrl: localStorage.getItem("spotify_profilePicture") || null
     }),
     getters: {

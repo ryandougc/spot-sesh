@@ -10,7 +10,6 @@ import NoBetaAccess from './views/NoBetaAccess.vue'
 
 import { useAuthStore } from './stores/authStore.js'
 import { useUserStore } from './stores/userStore.js'
-import { useRoomStore } from './stores/roomStore'
 
 import ErrorService from './services/ErrorService.js'
 
@@ -38,7 +37,6 @@ export const router = createRouter({
 
                         await useUserStore().getSpotifyProfile()
                     }
-                    // await useRoomStore().leaveRoom()
                 } catch(error) {
                     // ErrorService.onError(error)
                     throw new Error(error)

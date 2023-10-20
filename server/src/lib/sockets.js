@@ -21,7 +21,12 @@ export default function (io) {
         //     // new or unrecoverable session
         // }
 
+        let roomIdAsMember
+        let roomIdAsHost
+        let usersData
+
         socket.on('join-room', (roomId, user, cb) => {
+            console.log(user)
             try {
                 const room = rooms[roomId]
 
@@ -39,6 +44,9 @@ export default function (io) {
 
                 socket.to(room.id).emit('user-joined-room', user)
 
+                usersData = user
+                roomIdAsMember = roomId
+
                 return cb(true, room)
             } catch(error) {
                 logger.log({ 
@@ -54,6 +62,7 @@ export default function (io) {
         })
     
         socket.on('create-room', (user, cb) => {
+            console.log(user)
             try {
                 let roomId = user.name  // let room = generateRandomString(6)
 
@@ -68,6 +77,11 @@ export default function (io) {
                     host: user,
                     members: {}
                 }
+
+                usersData = user
+                roomIdAsHost = roomId
+
+                console.log(rooms[roomId].host.top5)
         
                 cb(true, rooms[roomId])
             } catch(error) {
@@ -94,6 +108,9 @@ export default function (io) {
 
                 // Get hosts top5 songs
                 trackList.push(...rooms[roomId].host.top5)
+                console.log(rooms[roomId].host.top5)
+
+                console.log(trackList)
     
                 cb(true, trackList)
             } catch(error) {
@@ -132,7 +149,7 @@ export default function (io) {
             try {
                 const room = rooms[roomId]
 
-                if(!room) cb(false, null, "The room you are trying to leave does not exist")
+                if(!room || room === undefined) return cb(false, null, "The room you are trying to leave does not exist")
 
                 if(room.host.spotifyId === user.spotifyId && Object.keys(room.members).length > 0) {
                     reassignHostToRandomMember(room) 
@@ -153,7 +170,7 @@ export default function (io) {
                 socket.leave(room.id)
 
                 socket.to(room.id).emit('user-left-room', {room, user})
-        
+
                 cb(true)
             } catch(error) {
                 logger.log({ 
@@ -168,47 +185,88 @@ export default function (io) {
             }
         })
     
-        socket.on('disconnecting', (a) => {
-            console.log("User Disconnected")
-            // try {
-            //     console.log("Disconnected")
+        socket.on('disconnecting', () => {
+            console.log("User Disconnected!")
+            try {
+                let room = rooms[roomIdAsHost]
 
-            //     socket.rooms.forEach(room => {
-            //         if(rooms[room]) {
-            //             // loop over members to find the user that just left and remove them from the room
-            //             for(let m in rooms[room].members) {
-            //                 if(m.socketId === socket.id) {
-            //                     console.log(m)
-            //                 }
-            //             }
+                if(roomIdAsHost && Object.keys(room.members).length > 0) {
+                    reassignHostToRandomMember(room)
 
+                    socket.leave(room.id)
 
+                    console.log("Host Left!")
 
+                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+                    socket.to(room.id).emit('change-room-host', room.host)
+                } else if(roomIdAsHost) {
+                    delete rooms[room.id]
 
-            //             const usersName = rooms[room].members[socket.id].name
-        
-            //             removeUserFromRoomInMemory(room, socket.id)
+                    socket.leave(room.id)
 
-            //             socket.leave(room)
-        
-            //             if(Object.keys(rooms[room].members).length <= 0) {
-            //                 delete rooms[room]
-            //             } else {
-            //                 socket.to(room).emit('user-left-room', { name: usersName, socketId: socket.id })
-        
-            //                 reassignHostToRandomMember(room, socket)
-            //             }
-            //         }
-            //     })
-            // } catch(error) {
-            //     logger.log({ 
-            //         level: 'error',
-            //         type: error.name,
-            //         message: error.message,
-            //         stack: error.stack
-            //     })
+                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+                    console.log("No members left in room, room deleted")
+                } else if(roomIdAsMember) {
+                    room = rooms[roomIdAsMember]
 
-            // }
+                    removeUserFromRoomInMemory(room, usersData.spotifyId)
+
+                    console.log("User Left Room")
+
+                    socket.leave(room.id)
+
+                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+                }
+
+                // for (const rKey in rooms) {
+                //     const room = rooms[rKey]
+
+                //     console.log(room)
+                //     console.log(socket.id)
+                    
+
+                //     if(room.host.socketId === socket.id && Object.keys(room.members).length > 0) {
+                //         reassignHostToRandomMember(room)
+
+                //         socket.leave(room.id)
+
+                //         console.log("Host Left!")
+
+                //         socket.to(room.id).emit('user-left-room', {room, user})
+                //         socket.to(room.id).emit('change-room-host', room.host)
+                //     } else if(room.host.socketId === socket.id) {
+                //         delete rooms[room.id]
+
+                //         socket.leave(room.id)
+
+                //         socket.to(room.id).emit('user-left-room', {room, user})
+                //         console.log("No members left in room, room deleted")
+                //     } else {
+                //         for (const mKey in room.members) {
+                //             const member = room.members[mKey]
+                            
+                //             if(member.socketId === socket.id) {
+                //                 console.log(member)
+                //                 removeUserFromRoomInMemory(room, member.spotifyId)
+
+                //                 console.log("User Left Room")
+
+                //                 socket.leave(room.id)
+                //                 console.log(member)
+                //                 socket.to(room.id).emit('user-left-room', {room, member})
+                //             }
+                //         }
+                //     }
+                // }
+            } catch(error) {
+                logger.log({ 
+                    level: 'error',
+                    type: error.name,
+                    message: error.message,
+                    stack: error.stack
+                })
+
+            }
         })
     })
 }

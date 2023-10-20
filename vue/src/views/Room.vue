@@ -2,7 +2,7 @@
     <HeaderLogin class="room__header" />
     <div id="room">
 
-        <BackButton class="room__back-button" @click="leaveRoom" />
+        <BackButton class="room__back-button" @click="backButton" /> <!-- the @click used to trigger leaveRoom. But leaving the route also triggers leaveRoom, so it was being called twice. -->
 
         <div class="room__information">
             <p class="room__information__page-title">{{ room.host.name }}'s Room</p>
@@ -100,12 +100,15 @@ export default {
     },
     data() {
         return {
-            user: this.$userStore.userObject,
+            // user: this.$userStore.userObject,
             // roomId: this.$roomStore.id,
             noActiveSessionModalActive: false
         }
     },
     computed: {
+        user() {
+            return this.$userStore.userObject
+        },
         room() {
             return this.$roomStore.getRoomObject
         },
@@ -114,12 +117,14 @@ export default {
         },
     },
     methods: {
+        backButton() {
+            this.$router.push('/')
+        },
         leaveRoom() {
             socket.emit('leave-room', this.room.id, this.user, (success, data, message) => {
                 if(!success) return console.log(message)
 
                 this.$roomStore.leaveRoom()
-                this.$router.push('/')
             })
         },
         startSession() {
@@ -131,16 +136,15 @@ export default {
                         const result = await playTracks(this.$authStore.accessToken, shuffledTracklist)
 
                         if(result.status === 404) {
-                            this.$roomStore.roomEvents.push('Error starting session: You need an active device with Spotify ready')
+                            const errorStartingSessionEvent = 'Error starting session: You need an active device with Spotify ready'
+                            this.$roomStore.addRoomEvent(errorStartingSessionEvent)
 
                             // alert('You need to have an active device availalble for Spotify. Open Spotify and start playing a song on the device you want the session to play on. Then come back here and press the "Start Session" button.')
                             this.toggleNoActiveSessionModal()
                         } else {
-                            // socket.emit('start-session', this.$roomStore.id, () => {
-                            //     this.$roomStore.roomEvents.push('You have started a listening session')
-
-                            //     this.$roomStore.sessionActive = true
-                            // })
+                            socket.emit('start-session', this.room.id, () => {
+                                this.$roomStore.startListeningSession('You have started a listening session')
+                            })
                         }
                     }
                 } catch(error) {
@@ -156,8 +160,7 @@ export default {
     created() {
         socket.on('user-joined-room', user => {
             try {
-                this.$roomStore.currentMembers[user.spotifyId] = user
-                this.$roomStore.roomEvents.push(`${user.name} has joined the room`)
+                this.$roomStore.addMember(user)
             } catch(error) {
                 console.log("There was an error when updating the page to show a new user was added to the room")
                 ErrorService.onError(error)
@@ -166,12 +169,12 @@ export default {
 
         socket.on('change-room-host', host => {
             try {
-                this.$roomStore.host = host
+                this.$roomStore.changeRoomHost(host)
 
-                if(this.$userStore.spotifyId === host.spotifyId) {
-                    this.$roomStore.roomEvents.push(`You are now the host`)
+                if(this.user.spotifyId === host.spotifyId) {
+                    this.$roomStore.addRoomEvent(`You are now the host`)
                 } else {
-                    this.$roomStore.roomEvents.push(`${host.name} is now the host`)
+                    this.$roomStore.addRoomEvent(`${host.name} is now the host`)
                 }
             } catch(error) {
                 console.log("There was an error when updating the room host")
@@ -180,10 +183,8 @@ export default {
         })
 
         socket.on('user-left-room', ({room, user}) => {
-            console.log("LEvGIN")
             try {
-                this.$roomStore.removeMember(user.spotifyId, room.members)
-                this.$roomStore.roomEvents.push(`${user.name} has left the room`)
+                this.$roomStore.removeMember(room.members, user.name)
             } catch(error) {
                 console.log("There was an error when deleting the user that left the room")
                 ErrorService.onError(error)
@@ -192,8 +193,7 @@ export default {
 
         socket.on('session-started', _ => {
             try {
-                this.$roomStore.sessionActive = true
-                this.$roomStore.roomEvents.push('Listening session has started')
+                this.$roomStore.startListeningSession('Listening session has started')
             } catch(error) {
                 console.log("There was an error when updating the page to show the session has started")
                 ErrorService.onError(error)
@@ -201,13 +201,13 @@ export default {
         })
     },
     beforeRouteLeave() {
-        // this.leaveRoom()
+        this.leaveRoom()
         this.$roomStore.leaveRoom()
         socket.off('user-joined-room')
         socket.off('change-room-host')
         socket.off('user-left-room')
         socket.off('session-started')
-    },
+    }
 }
 </script>
 

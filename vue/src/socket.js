@@ -37,4 +37,4 @@ socket.on("connect", () => {
     console.log("Session Lost")
     // new or unrecoverable session
   }
-});
+})
