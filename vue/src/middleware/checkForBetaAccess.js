@@ -17,11 +17,8 @@ export default async (accessToken) => {
         return true
     } catch(error) {
         if(error.response.status === 403 || error.response.status === 401) {
-            console.log("User doesn't have access to the app!")
-
             return false
         }
-
-        throw new Error(error)
+        return Error.onError(error)
     }
 }

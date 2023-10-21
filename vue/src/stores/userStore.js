@@ -32,11 +32,8 @@ export const useUserStore = defineStore('user', {
     actions: {
         async getSpotifyProfile() {
             if(this.name && this.name !== undefined && this.name !== "undefined") {
-                console.log("Already have Spotify profile")
                 
             } else {
-                console.log("Fetching Spotify Username")
-
                 const access_token = localStorage.getItem("access_token")
     
                 const profile = await getUserProfile(access_token)
@@ -52,11 +49,7 @@ export const useUserStore = defineStore('user', {
             }
         },
         async getTop5Tracks(accessToken) {
-            if(this.top5.length > 0) {
-                console.log("Already have the user's top5 tracks!")
-            } else {
-                console.log("Fetching user's top5 tracks")
-
+            if(this.top5.length <= 0) {
                 const top5Tracks = await getSpotifyTop5Tracks(accessToken)
 
                 this.top5 = top5Tracks

@@ -100,8 +100,6 @@ export default {
     },
     data() {
         return {
-            // user: this.$userStore.userObject,
-            // roomId: this.$roomStore.id,
             noActiveSessionModalActive: false
         }
     },
@@ -122,7 +120,7 @@ export default {
         },
         leaveRoom() {
             socket.emit('leave-room', this.room.id, this.user, (success, data, message) => {
-                if(!success) return console.log(message)
+                if(!success) return ErrorService.onError(new Error(message))
 
                 this.$roomStore.leaveRoom()
             })
@@ -139,7 +137,6 @@ export default {
                             const errorStartingSessionEvent = 'Error starting session: You need an active device with Spotify ready'
                             this.$roomStore.addRoomEvent(errorStartingSessionEvent)
 
-                            // alert('You need to have an active device availalble for Spotify. Open Spotify and start playing a song on the device you want the session to play on. Then come back here and press the "Start Session" button.')
                             this.toggleNoActiveSessionModal()
                         } else {
                             socket.emit('start-session', this.room.id, () => {
@@ -148,7 +145,7 @@ export default {
                         }
                     }
                 } catch(error) {
-                    console.log(error)
+                    ErrorService.onError(error)
                 }
 
             })
@@ -162,7 +159,6 @@ export default {
             try {
                 this.$roomStore.addMember(user)
             } catch(error) {
-                console.log("There was an error when updating the page to show a new user was added to the room")
                 ErrorService.onError(error)
             }
         })
@@ -177,7 +173,6 @@ export default {
                     this.$roomStore.addRoomEvent(`${host.name} is now the host`)
                 }
             } catch(error) {
-                console.log("There was an error when updating the room host")
                 ErrorService.onError(error)
             }
         })
@@ -186,7 +181,6 @@ export default {
             try {
                 this.$roomStore.removeMember(room.members, user.name)
             } catch(error) {
-                console.log("There was an error when deleting the user that left the room")
                 ErrorService.onError(error)
             }
         })
@@ -195,7 +189,6 @@ export default {
             try {
                 this.$roomStore.startListeningSession('Listening session has started')
             } catch(error) {
-                console.log("There was an error when updating the page to show the session has started")
                 ErrorService.onError(error)
             }
         })

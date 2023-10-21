@@ -1,14 +1,8 @@
 import axios from 'axios'
+import ErrorService from '../services/ErrorService'
 
 export async function getSpotifyTop5Tracks(accessToken) {
     try {
-        // const results = await fetch("https://api.spotify.com/v1/me/top/tracks?limit=5&offset=0&time_range=short_term", {
-        //     method: "GET",
-        //     headers: { "Authorization": `Bearer ${accessToken}` }
-        // })
-
-        // const data = await results.json()
-
         const results = await axios({
             method: 'GET',
             url: 'https://api.spotify.com/v1/me/top/tracks?limit=5&offset=0&time_range=short_term',
@@ -29,7 +23,7 @@ export async function getSpotifyTop5Tracks(accessToken) {
 
         return top5TrackUris
     } catch(error) {
-        throw new Error(error.message)
+        return ErrorService.onError(error)
     }
 }
 
@@ -43,7 +37,7 @@ export async function playTracks(accessToken, trackList) {
             body: body
         })
     } catch(error) {
-        throw new Error(error.message)
+        return ErrorService.onError(error)
     }
 }
 
@@ -74,6 +68,6 @@ export async function getUserProfile(accessToken) {
     
         return spotifyProfile
     } catch(error) {
-        throw new Error(error.message)
+        return ErrorService.onError(error)
     }
 }

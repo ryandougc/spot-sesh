@@ -39,8 +39,6 @@ export const useAuthStore = defineStore('auth', {
 
             await refreshAccessToken(client_id, refresh_token)
 
-            console.log("Token was refreshed")
-
             this.accessToken = localStorage.getItem('access_token')
             this.accessTokenExpiry = new Date(localStorage.getItem('access_token_expiry')).getTime()
             this.refreshToken = localStorage.getItem('refresh_token')

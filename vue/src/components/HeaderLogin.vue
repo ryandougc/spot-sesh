@@ -3,12 +3,12 @@
         <router-link to="/">
             <img 
                 class="navbar__logo spot-sesh-logo"
-                src="../assets/SpotSesh-logo.svg" 
+                src="../assets/images/logos/SpotSesh-logo.svg" 
                 alt="SpotSesh Logo"
             >
             <img
                 class="navbar__logo-mobile spot-sesh-logo-mobile"
-                src="../assets/SpotSesh-logo-mobile.svg" 
+                src="../assets/images/logos/SpotSesh-logo-mobile.svg" 
                 alt="SpotSesh Logo"
             >
         </router-link>

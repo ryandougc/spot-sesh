@@ -70,9 +70,6 @@ export default {
             // Move the user into the room they just created
             this.$router.push(`/room/${room.id}?clk=F`)
 
-            console.log("Joining Room")
-            console.log(room)
-
             this.$roomStore.currentUserJoinedRoom(room)
         } else {
             this.sessionToJoin = ""
@@ -84,9 +81,6 @@ export default {
     createRoom() {
       socket.emit('create-room', this.user, (success, room, message) => {
         if(success) {
-            console.log("Creating Room")
-            console.log(room)
-
             this.$roomStore.currentUserCreatedRoom(room)
 
             // Move the user into the room they just created

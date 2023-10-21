@@ -29,12 +29,4 @@ socket.on("connect", () => {
   delete timeout.socketTimeout
 
   console.log("Connected to socket.io")
-
-  if (socket.recovered) {
-    console.log("Session Recovered")
-    // any event missed during the disconnection period will be received now
-  } else {
-    console.log("Session Lost")
-    // new or unrecoverable session
-  }
 })

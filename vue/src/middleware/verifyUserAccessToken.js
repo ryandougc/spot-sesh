@@ -10,15 +10,12 @@ export default async () => {
 
         if(!tokenExists && !tokenIsValid) {
             // User needs to log in
-            console.log("User is logged out")
         } else {
             if(tokenExists && !tokenIsValid) {
                 // Users token needs to be refreshed
-                console.log("token needs to be refreshed")
                 await await useAuthStore().refreshToken()
             } else {
                 // Users token is valid
-                console.log("User is valid")
             }
         }
     } catch(error) {
