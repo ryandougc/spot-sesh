@@ -4,7 +4,6 @@ import 'dotenv/config.js'
 import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
-import { URL } from 'url'
 
 import { frontendLogger as logger } from './lib/logger.js'
 
@@ -29,14 +28,6 @@ app.post('/logs', (req, res, next) => {
         stack: error.stack
     })
 })
-
-// app.get("*", (req, res, next) => {
-//     res.sendFile('index.html', { root: new URL('../public', import.meta.url).pathname })
-// })
-
-// app.get("/*", (req, res, next) => {
-//     res.sendFile('index.html', { root: new URL('../public', import.meta.url).pathname })
-// })
 
 app.listen(EXPRESS_PORT, (err) => {
     if(err) return console.log(err)

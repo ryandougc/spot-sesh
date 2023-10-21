@@ -8,25 +8,11 @@ export default function (io) {
     console.log(`Socket server is listening on port ${ process.env.SOCKET_PORT }`)
 
     io.on('connection', socket =>{
-        // Each event should have a "cb" function to handle both success and errors
-        // cb(success, data, message?) {
-
-        // }
-
-        // if (socket.recovered) {
-        //     console.log("Big Recovery")
-        //     // recovery was successful: socket.id, socket.rooms and socket.data were restored
-        // } else {
-        //     console.log("We lost em")
-        //     // new or unrecoverable session
-        // }
-
         let roomIdAsMember
         let roomIdAsHost
         let usersData
 
         socket.on('join-room', (roomId, user, cb) => {
-            console.log(user)
             try {
                 const room = rooms[roomId]
 
@@ -62,7 +48,6 @@ export default function (io) {
         })
     
         socket.on('create-room', (user, cb) => {
-            console.log(user)
             try {
                 let roomId = user.name  // let room = generateRandomString(6)
 
@@ -80,8 +65,6 @@ export default function (io) {
 
                 usersData = user
                 roomIdAsHost = roomId
-
-                console.log(rooms[roomId].host.top5)
         
                 cb(true, rooms[roomId])
             } catch(error) {
@@ -108,9 +91,6 @@ export default function (io) {
 
                 // Get hosts top5 songs
                 trackList.push(...rooms[roomId].host.top5)
-                console.log(rooms[roomId].host.top5)
-
-                console.log(trackList)
     
                 cb(true, trackList)
             } catch(error) {
@@ -154,17 +134,11 @@ export default function (io) {
                 if(room.host.spotifyId === user.spotifyId && Object.keys(room.members).length > 0) {
                     reassignHostToRandomMember(room) 
 
-                    console.log("Host Left!")
-
                     socket.to(room.id).emit('change-room-host', room.host)
                 } else if(room.host.spotifyId === user.spotifyId) {
                     delete rooms[room.id]
-
-                    console.log("No members left in room, room deleted")
                 } else {
                     removeUserFromRoomInMemory(room, user.spotifyId)
-
-                    console.log("User Left Room")
                 }
 
                 socket.leave(room.id)
@@ -186,78 +160,24 @@ export default function (io) {
         })
     
         socket.on('disconnecting', () => {
-            console.log("User Disconnected!")
             try {
                 let room = rooms[roomIdAsHost]
 
                 if(roomIdAsHost && Object.keys(room.members).length > 0) {
                     reassignHostToRandomMember(room)
 
-                    socket.leave(room.id)
-
-                    console.log("Host Left!")
-
-                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
                     socket.to(room.id).emit('change-room-host', room.host)
                 } else if(roomIdAsHost) {
                     delete rooms[room.id]
-
-                    socket.leave(room.id)
-
-                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
-                    console.log("No members left in room, room deleted")
                 } else if(roomIdAsMember) {
                     room = rooms[roomIdAsMember]
 
                     removeUserFromRoomInMemory(room, usersData.spotifyId)
-
-                    console.log("User Left Room")
-
-                    socket.leave(room.id)
-
-                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
                 }
 
-                // for (const rKey in rooms) {
-                //     const room = rooms[rKey]
+                socket.leave(room.id)
 
-                //     console.log(room)
-                //     console.log(socket.id)
-                    
-
-                //     if(room.host.socketId === socket.id && Object.keys(room.members).length > 0) {
-                //         reassignHostToRandomMember(room)
-
-                //         socket.leave(room.id)
-
-                //         console.log("Host Left!")
-
-                //         socket.to(room.id).emit('user-left-room', {room, user})
-                //         socket.to(room.id).emit('change-room-host', room.host)
-                //     } else if(room.host.socketId === socket.id) {
-                //         delete rooms[room.id]
-
-                //         socket.leave(room.id)
-
-                //         socket.to(room.id).emit('user-left-room', {room, user})
-                //         console.log("No members left in room, room deleted")
-                //     } else {
-                //         for (const mKey in room.members) {
-                //             const member = room.members[mKey]
-                            
-                //             if(member.socketId === socket.id) {
-                //                 console.log(member)
-                //                 removeUserFromRoomInMemory(room, member.spotifyId)
-
-                //                 console.log("User Left Room")
-
-                //                 socket.leave(room.id)
-                //                 console.log(member)
-                //                 socket.to(room.id).emit('user-left-room', {room, member})
-                //             }
-                //         }
-                //     }
-                // }
+                socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
             } catch(error) {
                 logger.log({ 
                     level: 'error',
@@ -265,7 +185,6 @@ export default function (io) {
                     message: error.message,
                     stack: error.stack
                 })
-
             }
         })
     })
