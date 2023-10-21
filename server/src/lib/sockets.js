@@ -167,17 +167,20 @@ export default function (io) {
                     reassignHostToRandomMember(room)
 
                     socket.to(room.id).emit('change-room-host', room.host)
+                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+
+                    socket.leave(room.id)
                 } else if(roomIdAsHost) {
                     delete rooms[room.id]
                 } else if(roomIdAsMember) {
                     room = rooms[roomIdAsMember]
 
                     removeUserFromRoomInMemory(room, usersData.spotifyId)
+
+                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+
+                    socket.leave(room.id)
                 }
-
-                socket.leave(room.id)
-
-                socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
             } catch(error) {
                 logger.log({ 
                     level: 'error',
