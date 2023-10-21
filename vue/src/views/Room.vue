@@ -194,12 +194,11 @@ export default {
         })
     },
     beforeRouteLeave() {
-        this.leaveRoom()
-        this.$roomStore.leaveRoom()
         socket.off('user-joined-room')
         socket.off('change-room-host')
         socket.off('user-left-room')
         socket.off('session-started')
+        this.leaveRoom()
     }
 }
 </script>

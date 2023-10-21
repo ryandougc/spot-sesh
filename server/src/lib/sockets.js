@@ -163,23 +163,25 @@ export default function (io) {
             try {
                 let room = rooms[roomIdAsHost]
 
-                if(roomIdAsHost && Object.keys(room.members).length > 0) {
-                    reassignHostToRandomMember(room)
-
-                    socket.to(room.id).emit('change-room-host', room.host)
-                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
-
-                    socket.leave(room.id)
-                } else if(roomIdAsHost) {
-                    delete rooms[room.id]
-                } else if(roomIdAsMember) {
-                    room = rooms[roomIdAsMember]
-
-                    removeUserFromRoomInMemory(room, usersData.spotifyId)
-
-                    socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
-
-                    socket.leave(room.id)
+                if(room && room !== undefined) {
+                    if(roomIdAsHost && Object.keys(room.members).length > 0) {
+                        reassignHostToRandomMember(room)
+    
+                        socket.to(room.id).emit('change-room-host', room.host)
+                        socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+    
+                        socket.leave(room.id)
+                    } else if(roomIdAsHost) {
+                        delete rooms[room.id]
+                    } else if(roomIdAsMember) {
+                        room = rooms[roomIdAsMember]
+    
+                        removeUserFromRoomInMemory(room, usersData.spotifyId)
+    
+                        socket.to(room.id).emit('user-left-room', { room: room, user: usersData })
+    
+                        socket.leave(room.id)
+                    }
                 }
             } catch(error) {
                 logger.log({ 
