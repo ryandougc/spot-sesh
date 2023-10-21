@@ -9,7 +9,7 @@
         </router-link>
 
         <div class="navbar__links">
-            <a href="">How it Works</a>
+            <!-- <a href="">How it Works</a> -->
             <a @click="authCodeFlow">Login</a>
         </div>
     </div>
