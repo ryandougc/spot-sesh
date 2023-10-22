@@ -20,7 +20,6 @@
                         Come back here and click the "Start Listening" button again
                     </li>
                 </ol>
-                1. Open Spotify on the device you want to start listening on.
             </div>
             <div class="content-window__accept-button-container">
                 <button class="button-large" @click="modalAccept">Okay, I got it</button>
