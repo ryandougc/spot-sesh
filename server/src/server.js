@@ -12,8 +12,7 @@ const app = express()
 const EXPRESS_PORT = process.env.EXPRESS_PORT || 8080
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3001'],
-    
+    origin: [process.env.FRONT_END_URL, 'http://localhost:3001', 'http://localhost:5173']
 }))
 app.use(express.static('public'))
 app.use(bodyParser.json({ type: 'application/json' }))
