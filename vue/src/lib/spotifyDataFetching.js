@@ -27,11 +27,16 @@ export async function getSpotifyTop5Tracks(accessToken) {
     }
 }
 
-export async function playTracks(accessToken, trackList) {
+export async function playTracks(accessToken, trackList, deviceId) {
     try {
         const body = JSON.stringify({ "uris": trackList })
+        let url = 'https://api.spotify.com/v1/me/player/play'
 
-        return await fetch(`https://api.spotify.com/v1/me/player/play`, {
+        if(deviceId !== undefined || deviceId != null){
+            url += `?device_id=${deviceId}`
+        }
+
+        return await fetch(url, {
             method: "PUT",
             headers: { "Authorization": `Bearer ${accessToken}` },
             body: body
@@ -67,6 +72,24 @@ export async function getUserProfile(accessToken) {
 
     
         return spotifyProfile
+    } catch(error) {
+        return ErrorService.onError(error)
+    }
+}
+
+export async function getAvailableDevices(accessToken) {
+    try {
+        const results = await axios({
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/me/player/devices',
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+
+        const devices = results.data.devices
+
+        return devices
     } catch(error) {
         return ErrorService.onError(error)
     }

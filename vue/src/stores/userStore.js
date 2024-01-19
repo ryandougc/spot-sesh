@@ -10,7 +10,8 @@ export const useUserStore = defineStore('user', {
         name: localStorage.getItem("spotify_username"),
         spotifyId: localStorage.getItem("spotify_id"),
         top5: [],
-        profilePictureUrl: localStorage.getItem("spotify_profilePicture") || null
+        profilePictureUrl: localStorage.getItem("spotify_profilePicture") || null,
+        availableDevices: []
     }),
     getters: {
         upperCaseName: (state) => {
@@ -27,6 +28,9 @@ export const useUserStore = defineStore('user', {
                 top5: state.top5,
                 profilePictureUrl: state.profilePictureUrl
             }
+        },
+        getAvailableDevices: (state) => {
+            return state.availableDevices
         }
     },
     actions: {

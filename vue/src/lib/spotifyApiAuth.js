@@ -23,7 +23,7 @@ async function generateCodeChallenge(codeVerifier) {
 export async function redirectToAuthCodeFlow() {
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
     const redirectUri = `${import.meta.env.VITE_FRONTEND_URL}/callback`
-    const scope = 'user-top-read user-modify-playback-state'
+    const scope = 'user-top-read user-read-playback-state user-modify-playback-state'
 
     const verifier = generateCodeVerifier(128)
     const challenge = await generateCodeChallenge(verifier)

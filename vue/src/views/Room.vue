@@ -53,12 +53,11 @@
             </div>
         </div>
 
-
         <div class="room__start-listening-section">
             <button 
                 class="room__start-listening-section__button button-large"
                 v-if="userIsHost && !room.sessionActive"
-                @click="startSession"
+                @click="activeDevices"
             >
                 Start Listening
             </button>
@@ -72,21 +71,22 @@
 
     </div>
 
-    <NoActiveSession v-if="noActiveSessionModalActive" @modalAccepted="toggleNoActiveSessionModal" />
+    <NoActiveSession v-if="noActiveSessionModalActive" @modalAccepted="startSession" @modalCanceled="toggleNoActiveSessionModal" />
     
     <Footer class="footer" />
 </template>
   
 <script>
 import { socket } from "@/socket"
-import { playTracks } from '../lib/spotifyDataFetching.js'
+import { playTracks, getAvailableDevices } from '../lib/spotifyDataFetching.js'
 import { shuffleArray } from '../lib/utils.js'
 
 import HeaderLogin from "../components/HeaderLogin.vue"
 import Footer from "../components/Footer.vue"
 import UserListItem from "../components/UserListItem.vue"
 import BackButton from "../components/buttons/BackButton.vue"
-import NoActiveSession from '../components/modals/NoActiveSession.vue'
+// import NoActiveSession from '../components/modals/NoActiveSession.vue'
+import NoActiveSession from '../components/modals/SelectPlaybackDevice.vue'
 
 import ErrorService from "../services/ErrorService.js"
 
@@ -125,19 +125,19 @@ export default {
                 this.$roomStore.leaveRoom()
             })
         },
-        startSession() {
+        startSession(deviceId = null) {
             socket.emit('start-session-request', this.room.id, async (success, trackList) => {
                 try {
                     if(success) {
                         const shuffledTracklist = shuffleArray(trackList)
 
-                        const result = await playTracks(this.$authStore.accessToken, shuffledTracklist)
+                        const result = await playTracks(this.$authStore.accessToken, shuffledTracklist, deviceId)
 
                         if(result.status === 404) {
                             const errorStartingSessionEvent = 'Error starting session: You need an active device with Spotify ready'
                             this.$roomStore.addRoomEvent(errorStartingSessionEvent)
 
-                            this.toggleNoActiveSessionModal()
+                            // this.toggleNoActiveSessionModal()
                         } else {
                             socket.emit('start-session', this.room.id, () => {
                                 this.$roomStore.startListeningSession('You have started a listening session')
@@ -152,6 +152,13 @@ export default {
         },
         toggleNoActiveSessionModal() {
             this.noActiveSessionModalActive = !this.noActiveSessionModalActive
+        },
+        async activeDevices() {
+            const devices = await getAvailableDevices(this.$authStore.accessToken)
+
+            this.$userStore.availableDevices = devices
+
+            this.toggleNoActiveSessionModal()
         }
     },
     created() {
